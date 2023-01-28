@@ -5,7 +5,8 @@
 #define __BINARYTREE__
 #include <queue>
 #include <vector>
-using std::queue;
+
+using std::vector;
 enum class NodeColor {
   yellow,
   green,
@@ -55,16 +56,16 @@ template <class T> struct BinaryTree {
   // 前序遍历
   // 返回值 order是一个队列，里面存的元素是节点指针
   // 相当于之前是printf，现在要按照顺序push遍历到的节点指针
-  virtual queue<NodePtr> foreach_front() const = 0;
+  virtual vector<NodePtr> foreach_front() const = 0;
   // 中序遍历 返回值 order 同上
-  virtual queue<NodePtr> foreach_mid() const = 0;
+  virtual vector<NodePtr> foreach_mid() const = 0;
   // 后序遍历 返回值 order 同上
-  virtual queue<NodePtr> foreach_back() const = 0;
+  virtual vector<NodePtr> foreach_back() const = 0;
   // 层级遍历 返回值 order 同上
-  virtual queue<NodePtr> foreach_ceng() const = 0;
+  virtual vector<NodePtr> foreach_ceng() const = 0;
   // 查找节点
   // 返回值 查找节点的地址，没有找到返回{}
-  virtual std::vector<NodePtr> find_node(const T &_val) const = 0;
+  virtual vector<NodePtr> find_node(const T &_val) const = 0;
   // 插入节点
   // 参数 _val是插入的值，base是插入节点的父节点，
   // dirc是指要插入到父节点的左子节点还是右子节点
