@@ -3,10 +3,10 @@
 #include "some_func.h"
 #include <MyTree.hpp>
 #include <iostream>
-
+using std::cout;
 
 void test1() {
-  MyTree h1{};
+  MyTree<Node<int>> h1{};
 
   h1.create_tree();
   auto arr = h1.foreach_front();
@@ -21,7 +21,7 @@ void test1() {
   }
 }
 void test2() {
-  MyTree h1{};
+  MyTree<Node<int>> h1{};
   h1.create_tree();
   // auto arr = h1.foreach_mid();
   // auto arr = h1.foreach_back();
@@ -31,28 +31,21 @@ void test2() {
     std::cout << item->val << '\t';
   }
 }
-#if CXX_STD>=CXX20
+struct HHHx :Node<int>{
+  int cval;
+  /* data */
+};
+
 void test3() {
-  MyTree h1{};
-
-  h1.create_tree();
-  Node<int>* ptr = h1.head;
-  //<Node<int>> kn(ptr);
-  KNlist kn1(ptr);
-  auto arr = kn1.foreach_front();
-  for (auto item : arr) {
-    std::cout << item->val << '\t';
-  }
-  //AA a{10,'v',1.2};
-  //KNlist k{&a};
-  //k.show_val();
-
+  HHHx x{};
+  x.val = 10;
+  //cout<< xxx1(&x);
+  //decltype(x.left); //
+  update_col(&x);
+  //MyTree<HHHx> k{&x};
 }
-#include <format>
-#endif
-
 
 int main(int argc, char *argv[]) {
-  test2();
+  test3();
   return 0;
 }

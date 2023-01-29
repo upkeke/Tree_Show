@@ -43,7 +43,9 @@ struct KNlist {
   KNlist(NodePtr head) : head(head) {}
 
   NodePtr head;
-  void show_val() { std::cout << head->val << '\n'; }
+  void show_val() { 
+    
+    std::cout << head->val << '\n'; }
   vector<NodePtr> foreach_front() const {
     stack<NodePtr> sk;
     NodePtr temp = head;

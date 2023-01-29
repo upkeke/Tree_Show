@@ -2,42 +2,80 @@
 // date : 2023/01/27
 #pragma once
 
+#include <algorithm>
 #include <vector>
 #ifndef __MYTREE__
 #define __MYTREE__
 #include <BinaryTree.hpp>
+#include <concepts>
 #include <functional>
 #include <some_func.h>
 #include <stack>
-
 
 using std::queue;
 using std::stack;
 using std::vector;
 
-template <class T>
-concept node_able =
-    requires(T obj) {
-      obj.left;
-      obj.right;
-      obj.val;
-      requires(std::same_as<decltype(obj.left), decltype(obj.right)>);
-      {*obj.left}->std::convertible_to<T>;
-    };
-template <node_able T = Node<int>> 
-struct MyTree : BinaryTree<T> {
+//_修正节点横坐标
+template <class T> void update_row(Node<T> *head, int &index) {
+  if (head == nullptr)
+    return;
+  update_row(head->left, index);
+  head->row = index++;
+  update_row(head->right, index);
+}
+template <class T> int xxx1(Node<T> *k) { return k->val; }
+//_修正节点纵坐标
+template <class T> void update_col(Node<T> *head) {
+  if (head == nullptr)
+    return;
+  queue<Node<T> *> Q;
+  Q.push(head);
+  Q.push(0);
+  int index = 0;
+  do {
+    Node<T> *node = Q.front();
+    Q.pop();
+    if (node) {
+      node->col = index;
+      // cout << node->val << " ";
+      if (node->left)
+        Q.push(node->left);
+      if (node->right)
+        Q.push(node->right);
+    } else if (!Q.empty()) {
+      Q.push(0);
+      ++index;
+    }
+  } while (!Q.empty());
+}
+template <class T> void update_xy(Node<T> *head) {
+  int index = 0;
+  update_row(head, index);
+  update_col(head);
+}
+#if STD__CXX >= CXX_20
+template <node_able T> struct MyTree : BinaryTree<T> {};
+#else
+template <class T> struct MyTree : BinaryTree<T> {};
+#endif
 
+template <> struct MyTree<Node<int>> : BinaryTree<Node<int>> {
+  using T = Node<int>;
   using typename BinaryTree<T>::Node_;
   using typename BinaryTree<T>::NodePtr;
   using typename BinaryTree<T>::Direction;
   using typename BinaryTree<T>::val_type;
-  
   NodePtr head;
-
-  
   MyTree() = default;
   MyTree(const MyTree &other) { copy_tree(other); }
   MyTree(MyTree &&) = default;
+  explicit MyTree(NodePtr _head) {
+    MyTree tp;
+    tp.head = _head;
+    copy_tree(tp);
+    tp.head = nullptr;
+  }
   MyTree &operator=(const MyTree &) = default;
   MyTree &operator=(MyTree &&) = default;
 
@@ -46,7 +84,7 @@ struct MyTree : BinaryTree<T> {
     vector<int> data = get_vector_order(1, 7);
 
     head = new Node_(data[0]);
-    
+
     queue<NodePtr> qe;
     qe.push(head);
     size_t i = 1;
@@ -118,7 +156,6 @@ struct MyTree : BinaryTree<T> {
   }
   // 后序遍历 如果取出的上一个节点是栈顶的right，就可以取出栈顶
   // 如果不是 就进入右子树
-  // 使用双栈
   vector<NodePtr> foreach_back() const override {
     stack<NodePtr> sk;
     NodePtr temp = head;
@@ -181,7 +218,8 @@ struct MyTree : BinaryTree<T> {
     }
     return re;
   }
-  NodePtr insert_node(const val_type &_val, NodePtr base, Direction dirc) override {
+  NodePtr insert_node(const val_type &_val, NodePtr base,
+                      Direction dirc) override {
     auto arr = get_leaves();
     if (arr.count(base) > 0) {
       if (base->left == nullptr && dirc == Direction::left) {
@@ -195,12 +233,37 @@ struct MyTree : BinaryTree<T> {
     }
     return nullptr;
   }
-  size_t delete_node(const val_type &_val) override {
-    ;
-    return 0;
+  bool delete_node(NodePtr order) override {
+    if (order == nullptr || order->left != nullptr || order->right != nullptr)
+      return false;
+    bool re = false;
+    std::function<void(NodePtr)> func = [&](NodePtr _head) {
+      if (_head == nullptr)
+        return;
+      if (_head->left == order || _head->right == order) {
+        if (_head->left == order) {
+          _head->left = nullptr;
+        } else {
+          _head->right = nullptr;
+        }
+        re = true;
+        delete order;
+      }
+    };
+    func(head);
+    return re;
   }
   // 深度
-  size_t depth() const override { return 0; }
+  size_t depth() const override {
+    std::function<size_t(NodePtr)> func = [&](NodePtr _head) -> size_t {
+      if (_head == nullptr)
+        return 0;
+      size_t left = func(_head->left);
+      size_t right = func(_head->right);
+      return std::max(left, right) + 1;
+    };
+    return func(head);
+  }
   // 反转左右子树
   void reverse_tree() override {}
   std::set<NodePtr> get_leaves() const override {

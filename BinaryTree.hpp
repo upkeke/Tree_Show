@@ -16,19 +16,17 @@ enum class NodeColor {
 };
 struct Pos {
   int row;
-  int col;                             // 也是节点的深度
-  int height = 0;                      // 节点的高度
-  NodeColor color = NodeColor::yellow; // 红黑树专用
+  int col;                              
+  NodeColor color = NodeColor::yellow; 
 
   Pos() : row(0), col(0) {}
-  Pos(NodeColor color) : row(0), col(0), color(color) {}
+  Pos(NodeColor color) : Pos() { this->color = color; }
   void setPos(int x, int y);
   bool isRedn(Pos *head);
   void setColor(NodeColor _color);
-  virtual ~Pos() { ; }
+  virtual ~Pos() {  }
 };
-
-template <class T> struct Node {
+template <class T> struct Node : Pos {
   // Node(const Node &) = delete;
   // Node(Node &&) = delete;
   // Node &operator=(const Node &) = delete;
@@ -39,8 +37,29 @@ template <class T> struct Node {
   T val;
   Node *left;
   Node *right;
+  using tp = T;
 };
-template <class NodeT = Node<int>> struct BinaryTree {
+#if 0
+template <class T>
+concept node_able =
+    requires(T obj) {
+      obj.left;
+      obj.right;
+      obj.val;
+      requires(std::same_as<decltype(obj.left), decltype(obj.right)>);
+      { *obj.left } -> std::convertible_to<T>;
+    };
+#else
+template <class T>
+concept node_able = 
+  requires(T obj) {
+  obj.val;
+  requires std::derived_from<T,Node<decltype(obj.val)>>;
+};
+#endif
+
+
+template <node_able NodeT> struct BinaryTree {
   enum class Direction {
     left,
     right,
@@ -51,11 +70,7 @@ template <class NodeT = Node<int>> struct BinaryTree {
   using Node_ = NodeT;
   using NodePtr = NodeT *;
   // using order = std::queue<NodePtr>;
-  //using orderList = std::vector<NodePtr>;
-  NodePtr head1 = nullptr;
-  void func1(){
-      ;
-  }
+  // using orderList = std::vector<NodePtr>;
   //  创建树
   virtual void create_tree() = 0;
   // 拷贝树 ---深拷贝
@@ -82,7 +97,7 @@ template <class NodeT = Node<int>> struct BinaryTree {
   virtual NodePtr insert_node(const val_type &_val, NodePtr base,
                               Direction dirc) = 0;
   // 删除指定节点。只能删除叶子节点
-  virtual size_t delete_node(const val_type &_val) = 0;
+  virtual bool delete_node(NodePtr order) = 0;
   // 深度
   virtual size_t depth() const = 0;
   // 反转左右子树
