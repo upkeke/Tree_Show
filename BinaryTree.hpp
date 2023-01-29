@@ -16,15 +16,18 @@ enum class NodeColor {
 };
 struct Pos {
   int row;
-  int col;                              
-  NodeColor color = NodeColor::yellow; 
+  int col;
+  NodeColor color = NodeColor::yellow;
 
   Pos() : row(0), col(0) {}
   Pos(NodeColor color) : Pos() { this->color = color; }
-  void setPos(int x, int y);
-  bool isRedn(Pos *head);
-  void setColor(NodeColor _color);
-  virtual ~Pos() {  }
+  void setPos(int x, int y) {
+    row = x;
+    col = y;
+  }
+  bool isRedn(Pos *head) { return head->color == NodeColor::red; }
+  void setColor(NodeColor _color) { color = _color; }
+  virtual ~Pos() {}
 };
 template <class T> struct Node : Pos {
   // Node(const Node &) = delete;
@@ -51,13 +54,11 @@ concept node_able =
     };
 #else
 template <class T>
-concept node_able = 
-  requires(T obj) {
-  obj.val;
-  requires std::derived_from<T,Node<decltype(obj.val)>>;
-};
+concept node_able = requires(T obj) {
+                      obj.val;
+                      requires std::derived_from<T, Node<decltype(obj.val)>>;
+                    };
 #endif
-
 
 template <node_able NodeT> struct BinaryTree {
   enum class Direction {

@@ -265,7 +265,15 @@ template <> struct MyTree<Node<int>> : BinaryTree<Node<int>> {
     return func(head);
   }
   // 反转左右子树
-  void reverse_tree() override {}
+  void reverse_tree() override {
+    std::function<void(NodePtr)> func = [&](NodePtr _head){
+      if(_head==nullptr)return;
+      std::swap(_head->left,_head->right);
+      func(_head->left);
+      func(_head->right);
+    };
+
+  }
   std::set<NodePtr> get_leaves() const override {
     std::set<NodePtr> re;
     std::function<void(NodePtr)> func = [&](NodePtr _head) {
@@ -283,7 +291,9 @@ template <> struct MyTree<Node<int>> : BinaryTree<Node<int>> {
   }
 
   // 销毁树
-  void destroy_tree() override {}
+  void destroy_tree() override {
+    
+  }
   bool empty() const override { return head == nullptr; }
 };
 
