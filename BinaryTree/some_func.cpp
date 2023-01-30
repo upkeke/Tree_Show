@@ -2,6 +2,8 @@
 #include <numeric>
 #include <random>
 #include <some_func.h>
+#include<QSql>
+
 vector<int> get_vector_norepeat(size_t sz, int _min, int _max) {
 
   if (sz == 0)

@@ -5,6 +5,8 @@
 #define __BINARYTREE__
 #include <queue>
 #include <set>
+#include <QString>
+#include <type_traits>
 #include <vector>
 
 using std::vector;
@@ -45,7 +47,15 @@ template <class T> struct Node : Pos {
   Node *right;
   using tp = T;
 };
+template <class T>
+concept qstr_able =
+    std::is_arithmetic_v<T> || std::is_convertible_v<T, QString>;
+
 #if 0
+template<class T>
+concept str_able = requires{
+  requires std::is_integral_v<T>||std::is_floating_point_v<T>||std::is_convertible_v<T, std::string>;
+};
 template <class T>
 concept node_able =
     requires(T obj) {
@@ -56,11 +66,11 @@ concept node_able =
       { *obj.left } -> std::convertible_to<T>;
     };
 #else
+// 约束Node必须是Node或者Node的子类，且Node的val必须是算术类型或者能够隐式转化为string
 template <class T>
-concept node_able = requires(T obj) {
-                      obj.val;
-                      requires std::derived_from<T, Node<decltype(obj.val)>>;
-                    };
+concept node_able = requires {
+                      requires std::derived_from<T, Node<typename T::tp>>;
+                    } && qstr_able<typename T::tp>;
 #endif
 
 template <node_able NodeT> struct BinaryTree {
@@ -70,7 +80,8 @@ template <node_able NodeT> struct BinaryTree {
   };
   // using NodePtr = Node<T> *;
   // using Node_ = Node<T>;
-  using val_type = decltype(NodeT::val);
+  // using val_type = decltype(NodeT::val);
+  using val_type = typename NodeT::tp;
   using Node_ = NodeT;
   using NodePtr = NodeT *;
   // using order = std::queue<NodePtr>;

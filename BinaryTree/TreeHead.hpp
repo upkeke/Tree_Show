@@ -1,44 +1,42 @@
-﻿// author : keke
-// date : 2023/01/27
+﻿//date : 2023/01/30 
 #pragma once
-#ifndef __MYTREE__
-#define __MYTREE__
+#ifndef __TREEHEAD__
+#define __TREEHEAD__
+
 #include <BinaryTree.hpp>
 #include <algorithm>
 #include <concepts>
 #include <functional>
 #include <some_func.h>
-#include <stack>
 #include <vector>
 
 using std::queue;
-using std::stack;
 using std::vector;
 
 #if STD__CXX >= CXX_20
-template <node_able T> struct MyTree : BinaryTree<T> {};
+template <class T> struct TreeHead : BinaryTree<T> {};
 #else
 template <class T> struct MyTree : BinaryTree<T> {};
 #endif
 
-template <> struct MyTree<Node<int>> : BinaryTree<Node<int>> {
+template <> struct TreeHead<Node<int>> : BinaryTree<Node<int>> {
   using T = Node<int>;
   using typename BinaryTree<T>::Node_;
   using typename BinaryTree<T>::NodePtr;
   using typename BinaryTree<T>::Direction;
   using typename BinaryTree<T>::val_type;
   NodePtr head;
-  MyTree() = default;
-  MyTree(const MyTree &other) { copy_tree(other); }
-  MyTree(MyTree &&) = default;
-  explicit MyTree(NodePtr _head) {
-    MyTree tp;
+  TreeHead() = default;
+  TreeHead(const TreeHead &other) { copy_tree(other); }
+  TreeHead(TreeHead &&) = default;
+  explicit TreeHead(NodePtr _head) {
+    TreeHead tp;
     tp.head = _head;
     copy_tree(tp);
     tp.head = nullptr;
   }
-  MyTree &operator=(const MyTree &) = default;
-  MyTree &operator=(MyTree &&) = default;
+  TreeHead &operator=(const TreeHead &) = default;
+  TreeHead &operator=(TreeHead &&) = default;
 
   virtual void create_tree() override {
     // vector<int> data = get_vector_norepeat(10);
@@ -195,11 +193,14 @@ template <> struct MyTree<Node<int>> : BinaryTree<Node<int>> {
   }
   std::set<NodePtr> get_leaves() const override {
     std::set<NodePtr> re;
-    ::foreach_front(head, [](NodePtr cur, std::set<NodePtr> &_re) {
-      if (cur->left == nullptr && cur->right == nullptr) {
-        _re.insert(cur);
-      }
-    },re);
+    ::foreach_front(
+        head,
+        [](NodePtr cur, std::set<NodePtr> &_re) {
+          if (cur->left == nullptr && cur->right == nullptr) {
+            _re.insert(cur);
+          }
+        },
+        re);
     return re;
   }
   // 销毁树

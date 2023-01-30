@@ -10,8 +10,9 @@ namespace Ui {
 class mainwin;
 }
 QT_END_NAMESPACE
+#include <TreeHead.hpp>
 #include <vector>
-#include <MyTree.hpp>
+
 using std::vector;
 
 class QGraphicsScene;
@@ -19,7 +20,6 @@ class QPoint;
 class MyGraphicsItem;
 class QGraphicsLineItem;
 class MyLineItem;
-
 
 // template <class T> struct Node;
 // template <class T> struct MyTree;
@@ -36,7 +36,7 @@ private:
   void print_tree(NodePtr head);
   QPoint w网格到坐标(int x, int y);
   Ui::mainwin *ui;
-  MyTree<Node<int>> *avl;
+  TreeHead<Node<int>> *tree;
 
   QGraphicsScene *scene;
   vector<MyGraphicsItem *> w节点图元池;

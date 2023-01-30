@@ -5,27 +5,10 @@
 #include "MyLineItem.h"
 #include <some_func.h>
 
-
-
-void _后序遍历收集节点(Node<int> *head, vector<Node<int> *> &vt) {
-  if (head == nullptr)
-    return;
-  _后序遍历收集节点(head->left, vt);
-  _后序遍历收集节点(head->right, vt);
-  vt.push_back(head);
-}
-vector<Node<int> *> w节点集合(Node<int> *head) {
-  // 这一步会修正所有节点的坐标，
-  update_xy(head);
-  vector<Node<int> *> vt; // 按后序遍历 收集每一个节点
-  _后序遍历收集节点(head, vt);
-  return vt;
-}
-
 MainWin::MainWin(QWidget *parent) : QWidget(parent), ui(new Ui::mainwin) {
   ui->setupUi(this);
-  avl = new MyTree<Node<int>>();
-  avl->create_tree();
+  tree = new TreeHead<Node<int>>();
+  tree->create_tree();
   scene = new QGraphicsScene(this);
 
   ui->view->setScene(scene); // QGraphicsView
@@ -34,9 +17,7 @@ MainWin::MainWin(QWidget *parent) : QWidget(parent), ui(new Ui::mainwin) {
 }
 MainWin::~MainWin() { delete ui; }
 
-void MainWin::btn_build_clicked() {
-  print_tree(avl->head);
-}
+void MainWin::btn_build_clicked() { print_tree(tree->head); }
 void MainWin::btn_foreach_clicked() {}
 
 void MainWin::print_tree(NodePtr head) {
