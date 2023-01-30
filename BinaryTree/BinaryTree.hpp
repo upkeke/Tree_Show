@@ -8,12 +8,15 @@
 #include <vector>
 
 using std::vector;
+#ifndef NODECOLOR
+#define NODECOLOR
 enum class NodeColor {
   yellow,
   green,
   red,
   black,
 };
+#endif
 struct Pos {
   int row;
   int col;

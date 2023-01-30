@@ -1,7 +1,5 @@
 ﻿build
 .cache
 .vscode
-AVLTree.txt
-test.txt
-make.py
+
 //.gitignore

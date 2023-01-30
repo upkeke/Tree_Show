@@ -1,59 +1,20 @@
 ﻿// author : keke
 // date : 2023/01/27
 #pragma once
-
-#include <algorithm>
-#include <vector>
 #ifndef __MYTREE__
 #define __MYTREE__
 #include <BinaryTree.hpp>
+#include <algorithm>
 #include <concepts>
 #include <functional>
 #include <some_func.h>
 #include <stack>
+#include <vector>
 
 using std::queue;
 using std::stack;
 using std::vector;
 
-//_修正节点横坐标
-template <class T> void update_row(Node<T> *head, int &index) {
-  if (head == nullptr)
-    return;
-  update_row(head->left, index);
-  head->row = index++;
-  update_row(head->right, index);
-}
-template <class T> int xxx1(Node<T> *k) { return k->val; }
-//_修正节点纵坐标
-template <class T> void update_col(Node<T> *head) {
-  if (head == nullptr)
-    return;
-  queue<Node<T> *> Q;
-  Q.push(head);
-  Q.push(0);
-  int index = 0;
-  do {
-    Node<T> *node = Q.front();
-    Q.pop();
-    if (node) {
-      node->col = index;
-      // cout << node->val << " ";
-      if (node->left)
-        Q.push(node->left);
-      if (node->right)
-        Q.push(node->right);
-    } else if (!Q.empty()) {
-      Q.push(0);
-      ++index;
-    }
-  } while (!Q.empty());
-}
-template <class T> void update_xy(Node<T> *head) {
-  int index = 0;
-  update_row(head, index);
-  update_col(head);
-}
 #if STD__CXX >= CXX_20
 template <node_able T> struct MyTree : BinaryTree<T> {};
 #else
@@ -107,6 +68,7 @@ template <> struct MyTree<Node<int>> : BinaryTree<Node<int>> {
       return;
     delete head;
     // 后序遍历复制
+
     std::function<NodePtr(NodePtr)> func = [&](NodePtr _head) {
       if (_head == nullptr)
         return _head;
@@ -119,65 +81,26 @@ template <> struct MyTree<Node<int>> : BinaryTree<Node<int>> {
   }
   virtual NodePtr get_head() const override { return head; }
   vector<NodePtr> foreach_front() const override {
-    stack<NodePtr> sk;
-    NodePtr temp = head;
     vector<NodePtr> re;
-    while (!sk.empty() || temp != nullptr) {
-      while (temp != nullptr) {
-        re.push_back(temp); // 相当于printf
-        sk.push(temp);
-        temp = temp->left;
-      }
-      if (!sk.empty()) {
-        temp = sk.top();
-        sk.pop(); // 去掉中间节点
-        temp = temp->right;
-      }
-    }
+    ::foreach_front(
+        head, [](NodePtr cur, vector<NodePtr> &_re) { _re.push_back(cur); },
+        re);
     return re;
   }
   vector<NodePtr> foreach_mid() const override {
-    stack<NodePtr> sk;
-    NodePtr temp = head;
     vector<NodePtr> re;
-    while (!sk.empty() || temp != nullptr) {
-      while (temp != nullptr) {
-        sk.push(temp);
-        temp = temp->left;
-      }
-      if (!sk.empty()) {
-        temp = sk.top();
-        re.push_back(temp); // 相当于printf
-        sk.pop();           // 去掉中间节点
-        temp = temp->right;
-      }
-    }
+    ::foreach_mid(
+        head, [](NodePtr cur, vector<NodePtr> &_re) { _re.push_back(cur); },
+        re);
     return re;
   }
   // 后序遍历 如果取出的上一个节点是栈顶的right，就可以取出栈顶
   // 如果不是 就进入右子树
   vector<NodePtr> foreach_back() const override {
-    stack<NodePtr> sk;
-    NodePtr temp = head;
-    NodePtr last = head;
     vector<NodePtr> re;
-    while (temp != nullptr || !sk.empty()) {
-      while (temp != nullptr) {
-        sk.push(temp);
-        temp = temp->left;
-      }
-      temp = sk.top();
-      if (temp->right != nullptr) {
-        if (temp->right != last) {
-          temp = temp->right;
-          continue;
-        }
-      }
-      last = temp;
-      re.push_back(temp);
-      temp = nullptr; // 避免重复访问左子节点
-      sk.pop();
-    }
+    ::foreach_back(
+        head, [](NodePtr cur, vector<NodePtr> &_re) { _re.push_back(cur); },
+        re);
     return re;
   }
   vector<NodePtr> foreach_ceng() const override {
@@ -237,20 +160,21 @@ template <> struct MyTree<Node<int>> : BinaryTree<Node<int>> {
     if (order == nullptr || order->left != nullptr || order->right != nullptr)
       return false;
     bool re = false;
-    std::function<void(NodePtr)> func = [&](NodePtr _head) {
-      if (_head == nullptr)
-        return;
-      if (_head->left == order || _head->right == order) {
-        if (_head->left == order) {
-          _head->left = nullptr;
-        } else {
-          _head->right = nullptr;
-        }
-        re = true;
-        delete order;
-      }
-    };
-    func(head);
+    // 先序遍历
+    ::foreach_front(
+        head,
+        [](NodePtr cur, bool &_re, NodePtr _order) {
+          if (cur->left == _order || cur->right == _order) {
+            if (cur->left == _order) {
+              cur->left = nullptr;
+            } else {
+              cur->right = nullptr;
+            }
+            _re = true;
+            delete _order;
+          }
+        },
+        re, order);
     return re;
   }
   // 深度
@@ -266,33 +190,21 @@ template <> struct MyTree<Node<int>> : BinaryTree<Node<int>> {
   }
   // 反转左右子树
   void reverse_tree() override {
-    std::function<void(NodePtr)> func = [&](NodePtr _head){
-      if(_head==nullptr)return;
-      std::swap(_head->left,_head->right);
-      func(_head->left);
-      func(_head->right);
-    };
-
+    ::foreach_front(head,
+                    [](NodePtr cur) { std::swap(cur->left, cur->right); });
   }
   std::set<NodePtr> get_leaves() const override {
     std::set<NodePtr> re;
-    std::function<void(NodePtr)> func = [&](NodePtr _head) {
-      if (_head == nullptr)
-        return;
-      if (_head->left == nullptr && _head->right == nullptr) {
-        re.insert(_head);
-        return;
+    ::foreach_front(head, [](NodePtr cur, std::set<NodePtr> &_re) {
+      if (cur->left == nullptr && cur->right == nullptr) {
+        _re.insert(cur);
       }
-      func(_head->left);
-      func(_head->right);
-    };
-    func(head);
+    },re);
     return re;
   }
-
   // 销毁树
   void destroy_tree() override {
-    
+    ::foreach_back(head, [](NodePtr cur) { delete cur; });
   }
   bool empty() const override { return head == nullptr; }
 };
