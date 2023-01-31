@@ -1,17 +1,17 @@
 ﻿
 
-project(some_func)
+project(data_source)
 find_package(Qt6 REQUIRED Sql Widgets)
 
-add_library(${PROJECT_NAME} STATIC some_func.cpp)
+add_library(${PROJECT_NAME} STATIC data_source.cpp)
 target_link_libraries(${PROJECT_NAME}
         PUBLIC
         Qt6::Sql
 )
 message("Qt6Sql_INCLUDE_DIRS >> ${Qt6Sql_INCLUDE_DIRS}")
 
-add_executable(testBin main1.cpp )
+add_executable(testBin main1.cpp)
 target_link_libraries(testBin
     PRIVATE
-    some_func
+    data_source
 )

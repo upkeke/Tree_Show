@@ -17,7 +17,7 @@ if(MSVC)
     set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 endif()
 include_directories(${CMAKE_CURRENT_LIST_DIR}/BinaryTree)
-message("Qt5Widgets_INCLUDE_DIRS >> ${Qt6Widgets_INCLUDE_DIRS}")
+message("Qt6Widgets_INCLUDE_DIRS >> ${Qt6Widgets_INCLUDE_DIRS}")
 
 include_directories(BEFORE ${Qt6Widgets_INCLUDE_DIRS})
 add_subdirectory(BinaryTree)
@@ -26,19 +26,21 @@ add_subdirectory(MainWin)
 
 
 
-add_executable(XXX main.cpp)
-target_link_libraries(XXX 
-    PRIVATE 
-    mainwin
-    #graphicsItem
-)
 
-target_include_directories(XXX
-    PRIVATE 
-    ${CMAKE_CURRENT_LIST_DIR}/MainWin
-    #Qt6::Widgets
-    #Qt6::Core
-)
+# add_executable(XXX main.cpp)
+# target_link_libraries(XXX 
+#     PRIVATE 
+#     mainwin
+#     #graphicsItem
+# )
+
+
+# target_include_directories(XXX
+#     PRIVATE 
+#     ${CMAKE_CURRENT_LIST_DIR}/MainWin
+#     #Qt6::Widgets
+#     #Qt6::Core
+# )
 
 
 

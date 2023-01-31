@@ -16,6 +16,7 @@
 #include <QtWidgets/QHBoxLayout>
 #include <QtWidgets/QPushButton>
 #include <QtWidgets/QSpacerItem>
+#include <QtWidgets/QTabWidget>
 #include <QtWidgets/QVBoxLayout>
 #include <QtWidgets/QWidget>
 
@@ -25,7 +26,8 @@ class Ui_mainwin
 {
 public:
     QHBoxLayout *horizontalLayout;
-    QGraphicsView *view;
+    QTabWidget *tabWidget;
+    QWidget *tab_2;
     QVBoxLayout *verticalLayout;
     QPushButton *btn_build;
     QSpacerItem *verticalSpacer;
@@ -33,6 +35,8 @@ public:
     QPushButton *btn_foreach;
     QSpacerItem *verticalSpacer_2;
     QPushButton *btn_reverse;
+    QWidget *tab;
+    QGraphicsView *view;
 
     void setupUi(QWidget *mainwin)
     {
@@ -41,23 +45,22 @@ public:
         mainwin->resize(412, 343);
         horizontalLayout = new QHBoxLayout(mainwin);
         horizontalLayout->setObjectName("horizontalLayout");
-        view = new QGraphicsView(mainwin);
-        view->setObjectName("view");
-
-        horizontalLayout->addWidget(view);
-
-        verticalLayout = new QVBoxLayout();
+        tabWidget = new QTabWidget(mainwin);
+        tabWidget->setObjectName("tabWidget");
+        tab_2 = new QWidget();
+        tab_2->setObjectName("tab_2");
+        verticalLayout = new QVBoxLayout(tab_2);
         verticalLayout->setObjectName("verticalLayout");
-        btn_build = new QPushButton(mainwin);
+        btn_build = new QPushButton(tab_2);
         btn_build->setObjectName("btn_build");
 
         verticalLayout->addWidget(btn_build);
 
-        verticalSpacer = new QSpacerItem(20, 40, QSizePolicy::Minimum, QSizePolicy::Expanding);
+        verticalSpacer = new QSpacerItem(20, 75, QSizePolicy::Minimum, QSizePolicy::Expanding);
 
         verticalLayout->addItem(verticalSpacer);
 
-        cb_foreach = new QComboBox(mainwin);
+        cb_foreach = new QComboBox(tab_2);
         cb_foreach->addItem(QString());
         cb_foreach->addItem(QString());
         cb_foreach->addItem(QString());
@@ -65,25 +68,37 @@ public:
 
         verticalLayout->addWidget(cb_foreach);
 
-        btn_foreach = new QPushButton(mainwin);
+        btn_foreach = new QPushButton(tab_2);
         btn_foreach->setObjectName("btn_foreach");
 
         verticalLayout->addWidget(btn_foreach);
 
-        verticalSpacer_2 = new QSpacerItem(20, 40, QSizePolicy::Minimum, QSizePolicy::Expanding);
+        verticalSpacer_2 = new QSpacerItem(20, 74, QSizePolicy::Minimum, QSizePolicy::Expanding);
 
         verticalLayout->addItem(verticalSpacer_2);
 
-        btn_reverse = new QPushButton(mainwin);
+        btn_reverse = new QPushButton(tab_2);
         btn_reverse->setObjectName("btn_reverse");
 
         verticalLayout->addWidget(btn_reverse);
 
+        tabWidget->addTab(tab_2, QString());
+        tab = new QWidget();
+        tab->setObjectName("tab");
+        tabWidget->addTab(tab, QString());
 
-        horizontalLayout->addLayout(verticalLayout);
+        horizontalLayout->addWidget(tabWidget);
+
+        view = new QGraphicsView(mainwin);
+        view->setObjectName("view");
+
+        horizontalLayout->addWidget(view);
 
 
         retranslateUi(mainwin);
+
+        tabWidget->setCurrentIndex(0);
+
 
         QMetaObject::connectSlotsByName(mainwin);
     } // setupUi
@@ -98,6 +113,8 @@ public:
 
         btn_foreach->setText(QCoreApplication::translate("mainwin", "\351\201\215\345\216\206", nullptr));
         btn_reverse->setText(QCoreApplication::translate("mainwin", "\345\217\215\350\275\254", nullptr));
+        tabWidget->setTabText(tabWidget->indexOf(tab_2), QCoreApplication::translate("mainwin", "\351\273\230\350\256\244", nullptr));
+        tabWidget->setTabText(tabWidget->indexOf(tab), QCoreApplication::translate("mainwin", "\350\207\252\345\256\232\344\271\211", nullptr));
     } // retranslateUi
 
 };

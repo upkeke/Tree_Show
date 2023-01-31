@@ -11,16 +11,16 @@ QString getPixFile(const NodeColor &pix_c) {
   case NodeColor::yellow:
     str = "yellow";
     break;
-  case NodeColor::red:
-    str = "red";
+  case NodeColor::pink:
+    str = "pink";
     break;
-  case NodeColor::black:
-    str = "black";
+  case NodeColor::green:
+    str = "green";
     break;
   default:
     break;
   }
-  return QString("E:/C++/TreeShow/img/%1.jpg").arg(str);
+  return QString(":/m/img/%1.jpg").arg(str);
 }
 } // namespace
 
@@ -29,7 +29,8 @@ MyGraphicsItem::MyGraphicsItem(const QPointF &pos, int val, NodeColor pix_c,
     : QGraphicsItem{parent}, val(val), pen(Qt::black), color(pix_c)
 
 {
-  pix.load("E:/C++/TreeShow/img/yellow.jpg");
+  //:/m/img/pink.png
+  pix.load(":/m/img/yellow.jpg");
   pix = pix.scaledToHeight(30);
 
   // 红黑树和 平衡树的底图不一样，在上面写数字用的颜色有差别
@@ -44,8 +45,6 @@ MyGraphicsItem::MyGraphicsItem(const QPointF &pos, int val, NodeColor pix_c,
   int y = pix.height() / 2;
   lt = QPointF(-x, -y);
   setPos(pos);
-
-  // pix = QPixmap(R"(E:\C++\TreeShow\img\fang1.png)");
 }
 void MyGraphicsItem::paint(QPainter *painter,
                            const QStyleOptionGraphicsItem *option,
@@ -53,7 +52,7 @@ void MyGraphicsItem::paint(QPainter *painter,
   if (color == NodeColor::green || color == NodeColor::yellow) {
     painter->drawPixmap(lt, pix); // 高度 30
   } else {
-    if (color == NodeColor::red) {
+    if (color == NodeColor::pink) {
       painter->setBrush(Qt::red);
     } else {
       painter->setBrush(Qt::black);

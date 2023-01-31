@@ -1,17 +1,30 @@
 ﻿#include "mainwin.h"
-#include "uui_mainwin.h"
+#include "ui_mainwin.h"
+//#include "uui_mainwin.h"
 
 #include "MyGraphicsItem.h"
 #include "MyLineItem.h"
-#include <some_func.h>
+#include <common_func.hpp>
+#include <QGraphicsPixmapItem>
 
 MainWin::MainWin(QWidget *parent) : QWidget(parent), ui(new Ui::mainwin) {
   ui->setupUi(this);
   tree = new TreeHead<Node<int>>();
   tree->create_tree();
   scene = new QGraphicsScene(this);
+  //:/m/img/green.jpg
+  QGraphicsPixmapItem *item2 = new  QGraphicsPixmapItem(QPixmap(":/m/img/green.jpg"));
+  //QGraphicsPixmapItem *item1 = new  QGraphicsPixmapItem( QPixmap(R"(:/img/green.jpg)"));
+
+
+  //item2->setPos(100,100);
 
   ui->view->setScene(scene); // QGraphicsView
+  //scene->addItem(item1);
+  scene->addItem(item2);
+  scene->update();
+
+
   connect(ui->btn_build, &QPushButton::clicked, this,
           &MainWin::btn_build_clicked);
 }
@@ -21,7 +34,8 @@ void MainWin::btn_build_clicked() { print_tree(tree->head); }
 void MainWin::btn_foreach_clicked() {}
 
 void MainWin::print_tree(NodePtr head) {
-  vector<NodePtr> a节点集合 = w节点集合(head);
+  //实际的节点个数
+  vector<NodePtr> a节点集合 = node_back_list(head);
   int s节点图元个数 = w节点图元池.size(); // 图元用完后不要丢
   int s节点个数 = a节点集合.size(); // 图元个数大于节点个数，隐藏多余的图元
   // 图元个数小于节点个数，添加调多余的图元
@@ -59,8 +73,6 @@ void MainWin::print_tree(NodePtr head) {
         int y2 = child->col * 60;
         QTransform transform;
         auto point = w网格到坐标(child->row, child->col);
-        // auto end = dynamic_cast<MyGraphicsItem*>(scene->itemAt(point,
-        // transform));
         auto end = qgraphicsitem_cast<MyGraphicsItem *>(
             scene->itemAt(point, transform));
         if (line_i < s直线图元个数) // 调整图元位置

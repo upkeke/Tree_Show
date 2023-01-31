@@ -17,7 +17,7 @@ class MyLineItem;
 enum class NodeColor {
   yellow,
   green,
-  red,
+  pink,
   black,
 };
 #endif
@@ -53,5 +53,6 @@ public:
 
   virtual void mouseMoveEvent(QGraphicsSceneMouseEvent *event) override;
   void setBackColor(NodeColor pix_c);
+  void advance(int phase) override;
 };
 #endif

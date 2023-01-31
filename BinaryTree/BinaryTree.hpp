@@ -3,11 +3,12 @@
 #pragma once
 #ifndef __BINARYTREE__
 #define __BINARYTREE__
+#include <QString>
 #include <queue>
 #include <set>
-#include <QString>
 #include <type_traits>
 #include <vector>
+
 
 using std::vector;
 #ifndef NODECOLOR
@@ -15,7 +16,7 @@ using std::vector;
 enum class NodeColor {
   yellow,
   green,
-  red,
+  pink,
   black,
 };
 #endif
@@ -23,22 +24,17 @@ struct Pos {
   int row;
   int col;
   NodeColor color = NodeColor::yellow;
-
   Pos() : row(0), col(0) {}
   Pos(NodeColor color) : Pos() { this->color = color; }
   void setPos(int x, int y) {
     row = x;
     col = y;
   }
-  bool isRedn(Pos *head) { return head->color == NodeColor::red; }
+  bool isRedn(Pos *head) { return head->color == NodeColor::pink; }
   void setColor(NodeColor _color) { color = _color; }
   virtual ~Pos() {}
 };
 template <class T> struct Node : Pos {
-  // Node(const Node &) = delete;
-  // Node(Node &&) = delete;
-  // Node &operator=(const Node &) = delete;
-  // Node &operator=(Node &&) = delete;
   Node(const T &val, Node *left = nullptr, Node *right = nullptr)
       : val(val), left(left), right(right) {}
   Node() : Node(T{}) {}
@@ -47,46 +43,40 @@ template <class T> struct Node : Pos {
   Node *right;
   using tp = T;
 };
+//约束保证T是基本类型，或者能够隐式转换为QString的自定义类型
 template <class T>
 concept qstr_able =
     std::is_arithmetic_v<T> || std::is_convertible_v<T, QString>;
-
-#if 0
-template<class T>
-concept str_able = requires{
-  requires std::is_integral_v<T>||std::is_floating_point_v<T>||std::is_convertible_v<T, std::string>;
-};
-template <class T>
-concept node_able =
-    requires(T obj) {
-      obj.left;
-      obj.right;
-      obj.val;
-      requires(std::same_as<decltype(obj.left), decltype(obj.right)>);
-      { *obj.left } -> std::convertible_to<T>;
-    };
-#else
 // 约束Node必须是Node或者Node的子类，且Node的val必须是算术类型或者能够隐式转化为string
 template <class T>
 concept node_able = requires {
                       requires std::derived_from<T, Node<typename T::tp>>;
                     } && qstr_able<typename T::tp>;
-#endif
+
+
+
+/*------------------------------------------------------------
+--------------------------------------------------------------
+--------------------------------------------------------------
+只要你写的节点满足下面要求,即可打印二叉树
+1. 二叉树的单个节点的类型继承自Node，
+2. Node的模板参数满足 约束 qstr_able ，即约束保证T是基本类型，或者能够隐式转换为QString的自定义类型
+
+下面的BinaryTree要实现的方法仅供参考，可以不用这个
+------------------------------------------------------------
+--------------------------------------------------------------
+--------------------------------------------------------------
+*/
 
 template <node_able NodeT> struct BinaryTree {
   enum class Direction {
     left,
     right,
   };
-  // using NodePtr = Node<T> *;
-  // using Node_ = Node<T>;
-  // using val_type = decltype(NodeT::val);
+
   using val_type = typename NodeT::tp;
   using Node_ = NodeT;
   using NodePtr = NodeT *;
-  // using order = std::queue<NodePtr>;
-  // using orderList = std::vector<NodePtr>;
-  //  创建树
   virtual void create_tree() = 0;
   // 拷贝树 ---深拷贝
   virtual void copy_tree(const BinaryTree &other) = 0;

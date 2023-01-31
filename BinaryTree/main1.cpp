@@ -3,8 +3,8 @@
 #include <QDebug>
 #include <TreeHead.hpp>
 #include <iostream>
-#include <some_func.h>
-
+#include <common_func.hpp>
+#include <data_source.h>
 void test1() {
   TreeHead<Node<int>> h1{};
 
@@ -82,9 +82,7 @@ struct xxx0 {
 };
 struct xxx11 {
   int x = 10;
-  operator QString() const { 
-    return QString::number(x); 
-  }
+  operator QString() const { return QString::number(x); }
 };
 void test10() {
   // xxx0 x0{123};
@@ -99,6 +97,16 @@ void test10() {
   qDebug() << val_to_qstring(x4);
   bool x5 = false;
   qDebug() << val_to_qstring(x5);
+  QString x6 = "nnnn";
+  qDebug() << val_to_qstring(x6);
+  unsigned char x7 = 'k';
+  qDebug() << val_to_qstring(x7);
+  // std::is_integral_v<char>;
+  constexpr bool f1 = std::is_same_v<char, unsigned char>;
+  constexpr bool f11 = std::common_with<char, unsigned char>;
+  constexpr bool f12 = std::common_with<char, signed char>;
+  constexpr bool f2 = std::signed_integral<char>;
+  // common_with
 }
 int main(int argc, char *argv[]) {
   test10();
