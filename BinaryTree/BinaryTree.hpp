@@ -4,13 +4,9 @@
 #ifndef __BINARYTREE__
 #define __BINARYTREE__
 #include <QString>
-#include <queue>
+#include <config.h>
 #include <set>
 #include <type_traits>
-#include <vector>
-
-
-using std::vector;
 #ifndef NODECOLOR
 #define NODECOLOR
 enum class NodeColor {
@@ -20,30 +16,36 @@ enum class NodeColor {
   black,
 };
 #endif
+
 struct Pos {
-  int row;
-  int col;
+  int row = 0;
+  int col = 0;
   NodeColor color = NodeColor::yellow;
-  Pos() : row(0), col(0) {}
-  Pos(NodeColor color) : Pos() { this->color = color; }
+  Pos() =default;
+  explicit Pos(NodeColor color){ this->color = color; }
+  Pos(int row, int col, NodeColor color) : row(row), col(col), color(color) {}
   void setPos(int x, int y) {
     row = x;
     col = y;
   }
-  bool isRedn(Pos *head) { return head->color == NodeColor::pink; }
   void setColor(NodeColor _color) { color = _color; }
-  virtual ~Pos() {}
+  void setPosColor(int row, int col, NodeColor color) {
+    this->row = row;
+    this->col = col;
+    this->color = color;
+  }
+  void setPosColor(const Pos &other) { *this = other; }
 };
 template <class T> struct Node : Pos {
   Node(const T &val, Node *left = nullptr, Node *right = nullptr)
       : val(val), left(left), right(right) {}
-  Node() : Node(T{}) {}
+  Node() = default;
   T val;
   Node *left;
   Node *right;
   using tp = T;
 };
-//约束保证T是基本类型，或者能够隐式转换为QString的自定义类型
+// 约束保证T是基本类型，或者能够隐式转换为QString的自定义类型
 template <class T>
 concept qstr_able =
     std::is_arithmetic_v<T> || std::is_convertible_v<T, QString>;
@@ -53,14 +55,13 @@ concept node_able = requires {
                       requires std::derived_from<T, Node<typename T::tp>>;
                     } && qstr_able<typename T::tp>;
 
-
-
 /*------------------------------------------------------------
 --------------------------------------------------------------
 --------------------------------------------------------------
 只要你写的节点满足下面要求,即可打印二叉树
 1. 二叉树的单个节点的类型继承自Node，
-2. Node的模板参数满足 约束 qstr_able ，即约束保证T是基本类型，或者能够隐式转换为QString的自定义类型
+2. Node的模板参数满足 约束 qstr_able
+，即约束保证T是基本类型，或者能够隐式转换为QString的自定义类型
 
 下面的BinaryTree要实现的方法仅供参考，可以不用这个
 ------------------------------------------------------------
@@ -85,16 +86,16 @@ template <node_able NodeT> struct BinaryTree {
   // 前序遍历
   // 返回值 order是一个队列，里面存的元素是节点指针
   // 相当于之前是printf，现在要按照顺序push遍历到的节点指针
-  virtual vector<NodePtr> foreach_front() const = 0;
+  virtual _SPC vector<NodePtr> foreach_front() const = 0;
   // 中序遍历 返回值 order 同上
-  virtual vector<NodePtr> foreach_mid() const = 0;
+  virtual _SPC vector<NodePtr> foreach_mid() const = 0;
   // 后序遍历 返回值 order 同上
-  virtual vector<NodePtr> foreach_back() const = 0;
+  virtual _SPC vector<NodePtr> foreach_back() const = 0;
   // 层级遍历 返回值 order 同上
-  virtual vector<NodePtr> foreach_ceng() const = 0;
+  virtual _SPC vector<NodePtr> foreach_ceng() const = 0;
   // 查找节点
   // 返回值 查找节点的地址，没有找到返回{}
-  virtual vector<NodePtr> find_node(const val_type &_val) const = 0;
+  virtual _SPC vector<NodePtr> find_node(const val_type &_val) const = 0;
   // 插入节点
   // 参数 _val是插入的值，base是插入节点的父节点，base只能是叶子节点
   // dirc是指要插入到父节点的左子节点还是右子节点
@@ -113,6 +114,7 @@ template <node_able NodeT> struct BinaryTree {
   virtual void destroy_tree() = 0;
   // 空
   virtual bool empty() const = 0;
+  virtual size_t size() const = 0;
   virtual ~BinaryTree() {}
 };
 

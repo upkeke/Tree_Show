@@ -1,25 +1,20 @@
-﻿project(mainwin)
-set(mw_src 
-    #WIN32
-    mainwin.h
-    mainwin.ui
-    mainwin.cpp
-    res.qrc
+﻿project(GrapItemManager)
+set(manager_src 
+    GrapNodeItem.cpp
+    GrapLineItem.cpp
+    GrapItemManager.cpp
 )
-add_subdirectory(GraphicsItemManager)
-#测试动画
-add_subdirectory(animate_test)
+# add_custom_target(uui_get
+#     #COMMAND  "cmd.exe uic.exe mainwin.ui -o qwe.h"
+#     WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
+# )
 
-
-
-add_executable(${PROJECT_NAME} main.cpp ${mw_src})
+add_library(${PROJECT_NAME} SHARED ${manager_src})
 
 target_link_libraries(${PROJECT_NAME} 
     PUBLIC
     Qt6::Widgets
     Qt6::Core
-    data_source
-    GrapItemManager
 )
 # qt6_add_resources(${PROJECT_NAME} imageresources
 #     PREFIX "/img"

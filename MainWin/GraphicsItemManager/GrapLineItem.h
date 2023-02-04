@@ -5,18 +5,18 @@
 #define __MYLINEITEM__
 
 #include <QGraphicsLineItem>
-class MyGraphicsItem;
+class GrapNodeItem;
 
 // coordinate
-class MyLineItem : public QGraphicsLineItem {
+class GrapLineItem : public QGraphicsLineItem {
 public:
-  MyLineItem(MyGraphicsItem *front, MyGraphicsItem *end,
+  GrapLineItem(GrapNodeItem *front, GrapNodeItem *end,
              QGraphicsItem *parent = nullptr);
-  void setTwo(MyGraphicsItem *, MyGraphicsItem *);
+  void setTwo(GrapNodeItem *, GrapNodeItem *);
 
 private:
-  MyGraphicsItem *front;
-  MyGraphicsItem *end;
+  GrapNodeItem *front;
+  GrapNodeItem *end;
 
   void paint(QPainter *painter, const QStyleOptionGraphicsItem *option,
              QWidget *widget = nullptr) override;

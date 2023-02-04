@@ -1,21 +1,17 @@
-﻿//date : 2023/01/30 
+﻿// date : 2023/01/30
 #pragma once
 #ifndef __TREEHEAD__
 #define __TREEHEAD__
 
 #include <BinaryTree.hpp>
-#include <functional>
 #include <common_func.hpp>
-#include<data_source.h>
-#include <vector>
-#include<queue>
-using std::queue;
-using std::vector;
+//#include <data_source.h>
+#include <functional>
 
 #if STD__CXX >= CXX_20
 template <class T> struct TreeHead : BinaryTree<T> {};
 #else
-template <class T> struct MyTree : BinaryTree<T> {};
+template <class T> struct TreeHead : BinaryTree<T> {};
 #endif
 
 template <> struct TreeHead<Node<int>> : BinaryTree<Node<int>> {
@@ -24,7 +20,7 @@ template <> struct TreeHead<Node<int>> : BinaryTree<Node<int>> {
   using typename BinaryTree<T>::NodePtr;
   using typename BinaryTree<T>::Direction;
   using typename BinaryTree<T>::val_type;
-  NodePtr head;
+  NodePtr head = nullptr;
   TreeHead() = default;
   TreeHead(const TreeHead &other) { copy_tree(other); }
   TreeHead(TreeHead &&) = default;
@@ -39,11 +35,15 @@ template <> struct TreeHead<Node<int>> : BinaryTree<Node<int>> {
 
   virtual void create_tree() override {
     // vector<int> data = get_vector_norepeat(10);
-    vector<int> data = get_vector_order(1, 7);
+    std::vector<int> data(7, 0);
+    for (int i = 1; i <= 7; ++i) {
+      data[i] = i;
+    }
+    //_SPC vector<int> data = get_vector_order(1, 7);
 
     head = new Node_(data[0]);
 
-    queue<NodePtr> qe;
+    _SPC queue<NodePtr> qe;
     qe.push(head);
     size_t i = 1;
     while (!qe.empty()) {
@@ -58,6 +58,7 @@ template <> struct TreeHead<Node<int>> : BinaryTree<Node<int>> {
       qe.push(temp->right);
       qe.pop();
     }
+    ::update_xy(head);
   }
   void copy_tree(const BinaryTree<T> &other) override {
     auto _head = other.get_head();
@@ -65,46 +66,45 @@ template <> struct TreeHead<Node<int>> : BinaryTree<Node<int>> {
       return;
     delete head;
     // 后序遍历复制
-
     std::function<NodePtr(NodePtr)> func = [&](NodePtr _head) {
       if (_head == nullptr)
         return _head;
       NodePtr _left = func(_head->left);
       NodePtr _right = func(_head->right);
-      NodePtr re = new Node_(_head->val, _left, _right);
+      NodePtr re = new Node_(*_head);
       return re;
     };
     head = func(_head);
   }
   virtual NodePtr get_head() const override { return head; }
-  vector<NodePtr> foreach_front() const override {
-    vector<NodePtr> re;
+  _SPC vector<NodePtr> foreach_front() const override {
+    _SPC vector<NodePtr> re;
     ::foreach_front(
-        head, [](NodePtr cur, vector<NodePtr> &_re) { _re.push_back(cur); },
-        re);
+        head,
+        [](NodePtr cur, _SPC vector<NodePtr> &_re) { _re.push_back(cur); }, re);
     return re;
   }
-  vector<NodePtr> foreach_mid() const override {
-    vector<NodePtr> re;
+  _SPC vector<NodePtr> foreach_mid() const override {
+    _SPC vector<NodePtr> re;
     ::foreach_mid(
-        head, [](NodePtr cur, vector<NodePtr> &_re) { _re.push_back(cur); },
-        re);
+        head,
+        [](NodePtr cur, _SPC vector<NodePtr> &_re) { _re.push_back(cur); }, re);
     return re;
   }
   // 后序遍历 如果取出的上一个节点是栈顶的right，就可以取出栈顶
   // 如果不是 就进入右子树
-  vector<NodePtr> foreach_back() const override {
-    vector<NodePtr> re;
+  _SPC vector<NodePtr> foreach_back() const override {
+    _SPC vector<NodePtr> re;
     ::foreach_back(
-        head, [](NodePtr cur, vector<NodePtr> &_re) { _re.push_back(cur); },
-        re);
+        head,
+        [](NodePtr cur, _SPC vector<NodePtr> &_re) { _re.push_back(cur); }, re);
     return re;
   }
-  vector<NodePtr> foreach_ceng() const override {
+  _SPC vector<NodePtr> foreach_ceng() const override {
     if (empty())
       return {};
-    vector<NodePtr> re;
-    queue<NodePtr> qe;
+    _SPC vector<NodePtr> re;
+    _SPC queue<NodePtr> qe;
     qe.push(head);
     while (!qe.empty()) {
       NodePtr temp = qe.front();
@@ -121,17 +121,17 @@ template <> struct TreeHead<Node<int>> : BinaryTree<Node<int>> {
   bool find_node(NodePtr ptr) const {
     if (ptr == nullptr)
       return false;
-    vector<NodePtr> order = foreach_front();
+    _SPC vector<NodePtr> order = foreach_front();
     for (auto item : order) {
       if (item == ptr)
         return true;
     }
     return false;
   }
-  vector<NodePtr> find_node(const val_type &_val) const override {
-    vector<NodePtr> re;
+  _SPC vector<NodePtr> find_node(const val_type &_val) const override {
+    _SPC vector<NodePtr> re;
     // NRVO order和函数中re是同一变量
-    vector<NodePtr> order = foreach_front();
+    _SPC vector<NodePtr> order = foreach_front();
     for (auto item : order) {
       if (item->val == _val)
         re.push_back(item);
@@ -144,10 +144,12 @@ template <> struct TreeHead<Node<int>> : BinaryTree<Node<int>> {
     if (arr.count(base) > 0) {
       if (base->left == nullptr && dirc == Direction::left) {
         base->left = new Node_(_val);
+        base->left->setPosColor(base->col - 1, base->row + 1, base->color);
         return base->left;
       }
       if (base->right == nullptr && dirc == Direction::right) {
         base->right = new Node_(_val);
+        base->left->setPosColor(base->col + 1, base->row + 1, base->color);
         return base->right;
       }
     }
@@ -189,6 +191,7 @@ template <> struct TreeHead<Node<int>> : BinaryTree<Node<int>> {
   void reverse_tree() override {
     ::foreach_front(head,
                     [](NodePtr cur) { std::swap(cur->left, cur->right); });
+    ::update_xy(head);
   }
   std::set<NodePtr> get_leaves() const override {
     std::set<NodePtr> re;
@@ -207,6 +210,12 @@ template <> struct TreeHead<Node<int>> : BinaryTree<Node<int>> {
     ::foreach_back(head, [](NodePtr cur) { delete cur; });
   }
   bool empty() const override { return head == nullptr; }
+  size_t size() const override {
+    size_t count = 0;
+    ::foreach_front(
+        head, [](NodePtr cur, size_t &count) { count++; }, count);
+    return count;
+  }
 };
 
 #endif

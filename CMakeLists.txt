@@ -8,6 +8,13 @@ set(CMAKE_PREFIX_PATH "C:/Qt/6.4.2/mingw_64") # 设置qt动态库的路径
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
+#添加定义，是否使用标准容器
+add_compile_definitions(USE_STL_VECTOR=1)
+include_directories(
+    ./
+    ${CMAKE_CURRENT_LIST_DIR}/BinaryTree
+    ${CMAKE_CURRENT_LIST_DIR}/BinaryTree/container
+)
 
 find_package(Qt6 REQUIRED COMPONENTS Core Widgets)
 qt_standard_project_setup()
@@ -16,31 +23,13 @@ if(MSVC)
     set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
     set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 endif()
-include_directories(${CMAKE_CURRENT_LIST_DIR}/BinaryTree)
-message("Qt6Widgets_INCLUDE_DIRS >> ${Qt6Widgets_INCLUDE_DIRS}")
+#message("Qt6Widgets_INCLUDE_DIRS >> ${Qt6Widgets_INCLUDE_DIRS}")
+#include_directories(BEFORE ${Qt6Widgets_INCLUDE_DIRS})
 
-include_directories(BEFORE ${Qt6Widgets_INCLUDE_DIRS})
+
 add_subdirectory(BinaryTree)
 add_subdirectory(MainWin)
 
 
 
-
-
-# add_executable(XXX main.cpp)
-# target_link_libraries(XXX 
-#     PRIVATE 
-#     mainwin
-#     #graphicsItem
-# )
-
-
-# target_include_directories(XXX
-#     PRIVATE 
-#     ${CMAKE_CURRENT_LIST_DIR}/MainWin
-#     #Qt6::Widgets
-#     #Qt6::Core
-# )
-
-
-
+ 

@@ -11,19 +11,18 @@ class mainwin;
 }
 QT_END_NAMESPACE
 #include <TreeHead.hpp>
-#include <vector>
 
-using std::vector;
-
+#include "GrapItemManager.h"
 class QGraphicsScene;
-class QPoint;
-class MyGraphicsItem;
+class QPointF;
+class GrapNodeItem;
 class QGraphicsLineItem;
-class MyLineItem;
+class GrapLineItem;
+class QGraphicsItem;
 
 // template <class T> struct Node;
 // template <class T> struct MyTree;
-
+using NodePtr = Node<int> *;
 class MainWin : public QWidget {
   Q_OBJECT
 public:
@@ -32,19 +31,21 @@ public:
   ~MainWin();
 
 private:
-  using NodePtr = Node<int> *;
   void print_tree(NodePtr head);
-  QPoint w网格到坐标(int x, int y);
+  QPointF gridToCoordinate(int x, int y);
   Ui::mainwin *ui;
   TreeHead<Node<int>> *tree;
-
+  QGraphicsItem *ball;
   QGraphicsScene *scene;
-  vector<MyGraphicsItem *> w节点图元池;
-  vector<MyLineItem *> w直线图元池;
+  std::shared_ptr<GrapItemManager> grapPool;
 private slots:
   void btn_build_clicked();
   void btn_foreach_clicked();
   // void btn_focus_next_clicked();
-  // void btn_reverse_clicked();
+  void btn_reverse_clicked();
+  void animate_foreach();
 };
+
+
+
 #endif // WIDGET_H

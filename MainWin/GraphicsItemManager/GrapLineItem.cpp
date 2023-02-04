@@ -1,9 +1,9 @@
-﻿#include "MyLineItem.h"
-#include "MyGraphicsItem.h"
+﻿#include "GrapLineItem.h"
+#include "GrapNodeItem.h"
 #include <QDebug>
 #include <QPainter>
 #include <QPen>
-MyLineItem::MyLineItem(MyGraphicsItem *front, MyGraphicsItem *end,
+GrapLineItem::GrapLineItem(GrapNodeItem *front, GrapNodeItem *end,
                        QGraphicsItem *parent)
     : QGraphicsLineItem{parent}, front(front), end(end) {
   if (front == nullptr || end == nullptr) {
@@ -19,7 +19,7 @@ MyLineItem::MyLineItem(MyGraphicsItem *front, MyGraphicsItem *end,
   setPen(pen);
 }
 
-void MyLineItem::setTwo(MyGraphicsItem *one, MyGraphicsItem *two) {
+void GrapLineItem::setTwo(GrapNodeItem *one, GrapNodeItem *two) {
   if (front == nullptr || end == nullptr)
     qDebug() << "itemAt没找到图元2";
   front = one;
@@ -28,7 +28,7 @@ void MyLineItem::setTwo(MyGraphicsItem *one, MyGraphicsItem *two) {
 
 // https://blog.csdn.net/qq_32046111/article/details/121565965
 // https://blog.csdn.net/Fallinlove520/article/details/105727096
-void MyLineItem::paint(QPainter *painter,
+void GrapLineItem::paint(QPainter *painter,
                        const QStyleOptionGraphicsItem *option,
                        QWidget *widget) {
   if (front->collidesWithItem(end))
