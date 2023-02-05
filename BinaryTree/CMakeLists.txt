@@ -8,13 +8,18 @@ find_package(Qt6 REQUIRED Sql Widgets Core)
 
 include_directories(Qt6Core_INCLUDE_DIRS)
 get_directory_property(xx INCLUDE_DIRECTORIES)
-message("xxx ${Qt6Core_INCLUDE_DIRS}")
 
 
-add_library(${PROJECT_NAME} STATIC data_source.cpp)
-target_link_libraries(${PROJECT_NAME}
+
+# add_library(${PROJECT_NAME} STATIC data_source.cpp)
+# target_link_libraries(${PROJECT_NAME}
+#         PUBLIC
+#         Qt6::Sql
+# )
+add_library(FuncForTreeStr FuncForTreeStr.cpp)
+target_link_libraries(FuncForTreeStr
         PUBLIC
-        Qt6::Sql
+        Qt6::Core
 )
 
 add_executable(bin_main main.cpp)

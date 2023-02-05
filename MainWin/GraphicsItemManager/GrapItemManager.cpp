@@ -6,13 +6,6 @@
 
 // #include <container.h>
 
-
-QPointF gridToCoordinate(int x, int y) { return QPointF(x * 40, y * 60); }
-QPointF gridToCoordinate(const QPointF &gird) {
-  auto tp = gridToCoordinate(gird.x(), gird.y());
-  return tp;
-}
-
 GrapItemManager::GrapItemManager(QGraphicsScene *scene)
     : grapNodePool(), curNodeindex(0), grapLinePool(), curLineIndex(0),
       scene(scene) {}
@@ -26,23 +19,20 @@ GrapItemManager::instance(QGraphicsScene *scene) {
 
   return ItemManager;
 }
-GrapNodeItem *GrapItemManager::getGrapNode(const QPointF &pos,
-                                           const QString &val,
-                                           NodeColor pix_c) {
+GrapNodeItem *GrapItemManager::getGrapNode(NodePtr nodeptr) {
   auto temp = grapNodePool.size();
   GrapNodeItem *item = nullptr;
   if (curNodeindex == temp) {
-    item = new GrapNodeItem(pos, val, pix_c);
+    item = new GrapNodeItem(nodeptr);
     scene->addItem(item);
     grapNodePool.push_back(item);
   } else {
     item = grapNodePool[curNodeindex];
-    item->reSet(pos, val, pix_c);
+    item->reSet(nodeptr);
   }
   curNodeindex++;
   item->show();
   item->clearLines();
-  scene->update();
   return item;
 }
 
@@ -61,11 +51,8 @@ GrapLineItem *GrapItemManager::getGrapLine(GrapNodeItem *front,
     item = grapLinePool[curLineIndex];
     item->setTwo(front, end);
   }
-  // item = grapLinePool[curLineIndex++];
   curLineIndex++;
   item->show();
-  scene->update();
-  QSize sz;
   return item;
 }
 

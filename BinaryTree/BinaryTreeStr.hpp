@@ -1,48 +1,46 @@
-﻿// date : 2023/01/30
+﻿// author : keke
+// date : 2023/02/05
 #pragma once
-#ifndef __TREEHEAD__
-#define __TREEHEAD__
+#ifndef __BINARYTREESTR__
+#define __BINARYTREESTR__
 
+#include "FuncForTreeStr.h"
 #include <BinaryTree.hpp>
-#include <common_func.hpp>
-//#include <data_source.h>
+#include <QPointF>
 #include <functional>
 
-#if STD__CXX >= CXX_20
-template <class T> struct TreeHead : BinaryTree<T> {};
-#else
-template <class T> struct TreeHead : BinaryTree<T> {};
-#endif
 
-template <> struct TreeHead<Node<int>> : BinaryTree<Node<int>> {
-  using T = Node<int>;
-  using typename BinaryTree<T>::Node_;
-  using typename BinaryTree<T>::NodePtr;
-  using typename BinaryTree<T>::Direction;
-  using typename BinaryTree<T>::val_type;
+//extern void update_xy(PosStrNode *head, int scale_row, int scale_col);
+struct BinaryTreeStr : BinaryTree<PosStrNode> {
+
+  // using typename BinaryTree<PosStrNode>::Node;
+  // using typename BinaryTree<PosStrNode>::NodePtr;
+  using typename BinaryTree<PosStrNode>::Direction;
+  using typename BinaryTree<PosStrNode>::val_type;
+  using BaseNodeStr = _baseNode<_string>;
+  // using _baseNodePtr =typename _baseNode<_string> *;
+  using BaseNodeStrPtr = BaseNodeStr *;
+  using Node = PosStrNode;
+  using NodePtr = PosStrNode *;
   NodePtr head = nullptr;
-  TreeHead() = default;
-  TreeHead(const TreeHead &other) { copy_tree(other); }
-  TreeHead(TreeHead &&) = default;
-  explicit TreeHead(NodePtr _head) {
-    TreeHead tp;
-    tp.head = _head;
-    copy_tree(tp);
-    tp.head = nullptr;
+  /**
+   * @brief 放大比例
+   * 对于Node的row和col不能直接使用，需要进行方法
+   */
+  int scale_row = 40;
+  int scale_col = 60;
+  BinaryTreeStr() = default;
+  template <str_able tp> explicit BinaryTreeStr(_baseNode<tp> *_head) {
+    init_tree(_head);
   }
-  TreeHead &operator=(const TreeHead &) = default;
-  TreeHead &operator=(TreeHead &&) = default;
-
+  // 调试用
   virtual void create_tree() override {
     // vector<int> data = get_vector_norepeat(10);
-    std::vector<int> data(7, 0);
-    for (int i = 1; i <= 7; ++i) {
-      data[i] = i;
+    _SPC vector<_string> data(7);
+    for (int i = 0; i < 7; ++i) {
+      data[i] = QString::number(i);
     }
-    //_SPC vector<int> data = get_vector_order(1, 7);
-
-    head = new Node_(data[0]);
-
+    head = new Node(data[0]);
     _SPC queue<NodePtr> qe;
     qe.push(head);
     size_t i = 1;
@@ -50,35 +48,56 @@ template <> struct TreeHead<Node<int>> : BinaryTree<Node<int>> {
       if (i == data.size())
         break;
       NodePtr temp = qe.front();
-      temp->left = new Node_(data[i++]);
-      qe.push(temp->left);
+      temp->left = new Node(data[i++]);
+      // qe.push(static_cast<NodePtr>(temp->left));
+      qe.push(temp->Left());
       if (i == data.size())
         break;
-      temp->right = new Node_(data[i++]);
-      qe.push(temp->right);
+      temp->right = new Node(data[i++]);
+      // qe.push(static_cast<NodePtr>(temp->right));
+      qe.push(temp->Right());
       qe.pop();
     }
-    ::update_xy(head);
+    ::update_xy(head, scale_row, scale_col);
+    //::update_xy(head, scale_row, scale_col);
   }
-  void copy_tree(const BinaryTree<T> &other) override {
-    auto _head = other.get_head();
-    if (head == _head)
-      return;
-    delete head;
+  /**
+   * @brief 传入其他类型的Node指针
+   *
+   复制传入的二叉树头节点，并转为Node<_string>*类型，
+   同时根据scale放大节点的row和col
+   * @tparam tp  传入指针的val的类型
+   * @param nodeptr 传入的根节点
+   */
+  template <str_able tp> void init_tree(_baseNode<tp> *nodeptr) {
     // 后序遍历复制
-    std::function<NodePtr(NodePtr)> func = [&](NodePtr _head) {
+    std::function<NodePtr(_baseNode<tp> *)> func = [&](_baseNode<tp> *_head) {
       if (_head == nullptr)
         return _head;
       NodePtr _left = func(_head->left);
       NodePtr _right = func(_head->right);
-      NodePtr re = new Node_(*_head);
+#if HAS_QSTRING
+      _string str = val_to_qstring(_head->val);
+#else
+      _string str = val_to_string(_head->val);
+#endif
+      NodePtr re = new Node(str, _left, _right);
       return re;
     };
-    head = func(_head);
+    head = func(nodeptr);
+    // 修正节点的横纵坐标
+    ::update_xy(head, scale_row, scale_col);
   }
+  void set_scale(int x, int y) {
+    scale_row = x;
+    scale_col = y;
+    ::update_xy(head, scale_row, scale_col);
+  }
+  void update_xy() { ::update_xy(head, scale_row, scale_col); }
   virtual NodePtr get_head() const override { return head; }
   _SPC vector<NodePtr> foreach_front() const override {
     _SPC vector<NodePtr> re;
+
     ::foreach_front(
         head,
         [](NodePtr cur, _SPC vector<NodePtr> &_re) { _re.push_back(cur); }, re);
@@ -86,6 +105,7 @@ template <> struct TreeHead<Node<int>> : BinaryTree<Node<int>> {
   }
   _SPC vector<NodePtr> foreach_mid() const override {
     _SPC vector<NodePtr> re;
+
     ::foreach_mid(
         head,
         [](NodePtr cur, _SPC vector<NodePtr> &_re) { _re.push_back(cur); }, re);
@@ -110,9 +130,11 @@ template <> struct TreeHead<Node<int>> : BinaryTree<Node<int>> {
       NodePtr temp = qe.front();
       re.push_back(temp);
       if (temp->left != nullptr)
-        qe.push(temp->left);
+        // qe.push(temp->left);
+        qe.push(temp->Left());
       if (temp->right != nullptr)
-        qe.push(temp->right);
+        // qe.push(temp->right);
+        qe.push(temp->Right());
       qe.pop();
     }
     return re;
@@ -143,14 +165,16 @@ template <> struct TreeHead<Node<int>> : BinaryTree<Node<int>> {
     auto arr = get_leaves();
     if (arr.count(base) > 0) {
       if (base->left == nullptr && dirc == Direction::left) {
-        base->left = new Node_(_val);
-        base->left->setPosColor(base->col - 1, base->row + 1, base->color);
-        return base->left;
+        base->left = new Node(_val);
+        // base->left->setPosColor(base->col - 1, base->row + 1, base->color);
+        base->Left()->setPosColor(base->col - 1, base->row + 1, base->color);
+        return base->Left();
       }
       if (base->right == nullptr && dirc == Direction::right) {
-        base->right = new Node_(_val);
-        base->left->setPosColor(base->col + 1, base->row + 1, base->color);
-        return base->right;
+        base->right = new Node(_val);
+        // base->right->setPosColor(base->col + 1, base->row + 1, base->color);
+        base->Right()->setPosColor(base->col + 1, base->row + 1, base->color);
+        return base->Right();
       }
     }
     return nullptr;
@@ -181,8 +205,8 @@ template <> struct TreeHead<Node<int>> : BinaryTree<Node<int>> {
     std::function<size_t(NodePtr)> func = [&](NodePtr _head) -> size_t {
       if (_head == nullptr)
         return 0;
-      size_t left = func(_head->left);
-      size_t right = func(_head->right);
+      size_t left = func(_head->Left());
+      size_t right = func(_head->Right());
       return std::max(left, right) + 1;
     };
     return func(head);
@@ -191,7 +215,7 @@ template <> struct TreeHead<Node<int>> : BinaryTree<Node<int>> {
   void reverse_tree() override {
     ::foreach_front(head,
                     [](NodePtr cur) { std::swap(cur->left, cur->right); });
-    ::update_xy(head);
+    ::update_xy(head, scale_row, scale_col);
   }
   std::set<NodePtr> get_leaves() const override {
     std::set<NodePtr> re;

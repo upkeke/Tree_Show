@@ -1,17 +1,25 @@
 ﻿
-//author : keke
-//date : 2023/02/04 
-#pragma once
+// author : keke
+// date : 2023/02/04
+#pragma 
+#define __COMMON_FUNC__
 #ifndef __COMMON_FUNC__
 #define __COMMON_FUNC__
 
-
-
 #include <BinaryTree.hpp>
+#include <QPointF>
+#include <QString>
 #include <concepts>
+#include <string>
 
+using std::string;
 
-template <qstr_able T> QString val_to_qstring(const T &val) {
+inline QPointF operator*(const Pos &ps, const QPointF &pt) {
+  return QPointF(ps.row * pt.x(), ps.col * pt.y());
+}
+inline QPointF operator*(const QPointF &pt, const Pos &ps) { return ps * pt; }
+
+template <str_able T> QString val_to_qstring(const T &val) {
   if constexpr (std::is_arithmetic_v<T>) {
     if constexpr (std::is_same_v<bool, T>) {
       return val ? "true" : "false";
@@ -20,11 +28,26 @@ template <qstr_able T> QString val_to_qstring(const T &val) {
     } else {
       return QString::number(val);
     }
+  } else if constexpr (std::is_convertible_v<T, std::string>) {
+    return QString::fromStdString(val);
   } else {
     if constexpr (std::is_same_v<QChar, T>)
       return QString(1, val);
     else
       return val;
+  }
+}
+template <str_able T> string val_to_string(const T &val) {
+  if constexpr (std::is_arithmetic_v<T>) {
+    if constexpr (std::is_same_v<bool, T>) {
+      return val ? "true" : "false";
+    } else if constexpr (std::is_same_v<char, T>) {
+      return string(1, val);
+    } else {
+      return std::to_string(val);
+    }
+  } else {
+    return val;
   }
 }
 template <class T>
@@ -106,14 +129,14 @@ void foreach_back(NodePtr head, Func func, Args &&...args) {
 }
 
 //_修正节点横坐标
-template <class T> void update_row(Node<T> *head) {
+template <class T> void update_row(BaseNode<T> *head, int scale_row) {
   int row = 0;
-  ::foreach_mid(head, [](Node<T> *cur,int& _row){
-    cur->row = _row++;
-  },row);
+  ::foreach_mid(
+      head, [](Node<T> *cur, int &_row, int s) { cur->row = _row++ * s; }, row,
+      scale_row);
 }
 //_修正节点纵坐标
-template <class T> void update_col(Node<T> *head) {
+template <class T> void update_col(BaseNode<T> *head, int scale_col) {
   if (head == nullptr)
     return;
   _SPC queue<Node<T> *> qe;
@@ -123,8 +146,8 @@ template <class T> void update_col(Node<T> *head) {
   do {
     Node<T> *node = qe.front();
     qe.pop();
-    if (node!=nullptr) {
-      node->col = index;
+    if (node != nullptr) {
+      node->col = index * scale_col;
       // cout << node->val << " ";
       if (node->left)
         qe.push(node->left);
@@ -137,9 +160,12 @@ template <class T> void update_col(Node<T> *head) {
   } while (!qe.empty());
 }
 // 修正坐标
-template <class T> void update_xy(Node<T> *head) {
-  update_row(head);
-  update_col(head);
+template <class T>
+void update_xy(BaseNode<T> *head, int scale_row = 40, int scale_col = 60) {
+  if (head == nullptr)
+    return;
+  update_row(head, scale_row);
+  update_col(head, scale_col);
 }
 
 #endif

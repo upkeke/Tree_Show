@@ -1,6 +1,6 @@
 ﻿
 // #include "data_source.h"
-#include "TreeHead.hpp"
+#include "BinaryTreeStr.hpp"
 #include <compare>
 #include <container.hpp>
 #include <iostream>
@@ -80,44 +80,11 @@ void func1() {
   comp(obj1, obj2);
 }
 
+#include <QDebug>
 #include <vector>
-void func2() {
-  QString s("123");
-  qDebug() << s;
-}
-void func3() {
-  TreeHead<Node<int>> yy;
-  yy.create_tree();
-  auto head = yy.get_head();
-  auto arr = yy.foreach_mid();
-  for (auto i : arr) {
-    std::cout << i->val << ' ';
-  }
-  std::cout << '\n';
-  yy.reverse_tree();
-  auto arr1 = yy.foreach_mid();
-  for (auto i : arr1) {
-    std::cout << i->val << ' ';
-  }
-}
 
-struct KK : Pos {
-  int y = 0;
-  KK(int y) : y(y) {}
-};
-std::ostream &operator<<(std::ostream &out, KK &k) {
-  out << k.row << ' ' << k.col << ' ' << k.y << '\n';
-  return out;
-}
-void func4() {
-  KK k1(10);
-  k1.setPosColor(11, 22, NodeColor::black);
-  KK k2(30);
-  k2.setPosColor(k1);
-  std::cout << k1 << k2;
-}
 int main(int argc, char *argv[]) {
-  func4();
+  func1();
   return 0;
 }
 

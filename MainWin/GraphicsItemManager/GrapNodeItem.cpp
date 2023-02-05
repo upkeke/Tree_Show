@@ -22,47 +22,31 @@ QString getPixFile(const NodeColor &pix_c) {
   }
   return QString(":/m/img/%1.jpg").arg(str);
 }
-QPointF operator*(const Pos &ps, const QPointF &pt) {
-  return QPointF(ps.row * pt.x(), ps.col * pt.y());
-}
-QPointF operator*(const QPointF &pt, const Pos &ps) { return ps * pt; }
+
 // QPointF gridToCoor(const Pos &ps,const QPointF &pt) {
 
 //   return QPointF(x * 40, y * 60); }
 
 } // namespace
 
-GrapNodeItem::GrapNodeItem(const QPointF &pos, const QString &val,
-                           NodeColor pix_c, QGraphicsItem *parent)
-    : QGraphicsItem{parent}, val(val), color(pix_c)
-
-{
-  //:/m/img/pink.png
-  pix.load(getPixFile(pix_c));
+GrapNodeItem::GrapNodeItem(NodePtr nodeptr, QGraphicsItem *parent)
+    : QGraphicsItem{parent}, nodeptr(nodeptr) {
+  pix.load(getPixFile(nodeptr->color));
   toHeight();
   setFlag(QGraphicsItem::ItemIsMovable);
   setFlag(QGraphicsItem::ItemIsSelectable);
 
-  setPos(pos);
-}
-GrapNodeItem::GrapNodeItem(Node<QString> *nodeptr, QGraphicsItem *parent)
-    : QGraphicsItem{parent}, val(nodeptr->val), color(nodeptr->color) {
-  pix.load(getPixFile(color));
-  toHeight();
-  setFlag(QGraphicsItem::ItemIsMovable);
-  setFlag(QGraphicsItem::ItemIsSelectable);
-
-  auto pos = *nodeptr * w_h;
-  setPos(pos);
+  setPos(QPointF(nodeptr->row, nodeptr->col));
 }
 
 void GrapNodeItem::paint(QPainter *painter,
                          const QStyleOptionGraphicsItem *option,
                          QWidget *widget) {
-  if (color == NodeColor::green || color == NodeColor::yellow) {
+  if (nodeptr->color == NodeColor::green ||
+      nodeptr->color == NodeColor::yellow) {
     painter->drawPixmap(boundingRect().topLeft(), pix); // 高度 30
   } else {
-    if (color == NodeColor::pink) {
+    if (nodeptr->color == NodeColor::pink) {
       painter->setBrush(Qt::red);
     } else {
       painter->setBrush(Qt::black);
@@ -72,12 +56,16 @@ void GrapNodeItem::paint(QPainter *painter,
   QFont font("微软雅黑", 15);
   painter->setPen(pen);
   painter->setFont(font);
-  painter->drawText(boundingRect(), Qt::AlignCenter, val);
+  painter->drawText(boundingRect(), Qt::AlignCenter, nodeptr->val);
 }
 
-void GrapNodeItem::setVal(const QString &num) { val = num; }
+void GrapNodeItem::setVal(const QString &num) {
+  nodeptr->val = num;
+  nodeptr->val = num;
+  scene()->update();
+}
 
-QString GrapNodeItem::getVal() { return val; }
+QString GrapNodeItem::getVal() { return nodeptr->val; }
 
 void GrapNodeItem::addLine(GrapLineItem *line) { lineArry.push_back(line); }
 
@@ -106,14 +94,15 @@ void GrapNodeItem::mouseMoveEvent(QGraphicsSceneMouseEvent *event) {
 }
 
 void GrapNodeItem::setBackColor(NodeColor ncolor) {
-  color = ncolor;
+  nodeptr->color = ncolor;
 
-  if (color == NodeColor::green || color == NodeColor::yellow) {
+  if (nodeptr->color == NodeColor::green ||
+      nodeptr->color == NodeColor::yellow) {
     pix.load(getPixFile(ncolor));
     pix = pix.scaledToHeight(30);
   }
 
-  if (color == NodeColor::black)
+  if (nodeptr->color == NodeColor::black)
     this->pen.setColor(Qt::white);
   else
     this->pen.setColor(Qt::black);
@@ -127,18 +116,8 @@ void GrapNodeItem::advance(int phase) {
   // 每次向左移2 向下移1
   setPos(mapToScene(2, 1));
 }
-void GrapNodeItem::reSet(const QPointF &pos, const QString &val,
-                         NodeColor pix_c, QGraphicsItem *parent) {
-  this->setPos(pos);
-  this->val = val;
-  this->color = pix_c;
-  this->setParentItem(parent);
-}
-void GrapNodeItem::reSet(const Node<QString> &node) {
-
-  this->setPos(node *);
-  this->val = node.val;
-  this->color = node.color;
-  // this->setParentItem(parent);
+void GrapNodeItem::reSet(NodePtr nodeptr) {
+  this->nodeptr = nodeptr;
+  this->setPos(QPointF(nodeptr->row, nodeptr->col));
 }
 void GrapNodeItem::toHeight(int order_h) { pix = pix.scaledToHeight(order_h); }

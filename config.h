@@ -14,4 +14,11 @@
 #include<container.hpp>
 #endif
 
+#define HAS_QSTRING 1
+#if HAS_QSTRING
+#include<QString>
+#else
+#include<string>
+using std::string;
+#endif
 #endif

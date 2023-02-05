@@ -18,7 +18,8 @@ target_link_libraries(${PROJECT_NAME}
     PUBLIC
     Qt6::Widgets
     Qt6::Core
-    data_source
+    #data_source
+    FuncForTreeStr
     GrapItemManager
 )
 # qt6_add_resources(${PROJECT_NAME} imageresources

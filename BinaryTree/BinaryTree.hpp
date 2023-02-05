@@ -3,57 +3,39 @@
 #pragma once
 #ifndef __BINARYTREE__
 #define __BINARYTREE__
-#include <QString>
 #include <config.h>
 #include <set>
 #include <type_traits>
-#ifndef NODECOLOR
-#define NODECOLOR
-enum class NodeColor {
-  yellow,
-  green,
-  pink,
-  black,
-};
-#endif
 
-struct Pos {
-  int row = 0;
-  int col = 0;
-  NodeColor color = NodeColor::yellow;
-  Pos() =default;
-  explicit Pos(NodeColor color){ this->color = color; }
-  Pos(int row, int col, NodeColor color) : row(row), col(col), color(color) {}
-  void setPos(int x, int y) {
-    row = x;
-    col = y;
-  }
-  void setColor(NodeColor _color) { color = _color; }
-  void setPosColor(int row, int col, NodeColor color) {
-    this->row = row;
-    this->col = col;
-    this->color = color;
-  }
-  void setPosColor(const Pos &other) { *this = other; }
-};
-template <class T> struct Node : Pos {
-  Node(const T &val, Node *left = nullptr, Node *right = nullptr)
+
+#if HAS_QSTRING
+template <class T>
+concept str_able =
+    std::is_arithmetic_v<T> || std::is_convertible_v<T, std::string> ||
+    std::is_same_v<T, QString>;
+using _string = QString;
+#else
+using _string = string;
+template <class T>
+concept str_able =
+    std::is_arithmetic_v<T> || std::is_convertible_v<T, std::string>;
+#endif
+template <str_able T> struct _baseNode {
+  _baseNode(const T &val, _baseNode *left = nullptr, _baseNode *right = nullptr)
       : val(val), left(left), right(right) {}
-  Node() = default;
+  _baseNode() = default;
   T val;
-  Node *left;
-  Node *right;
+  _baseNode *left;
+  _baseNode *right;
   using tp = T;
 };
 // 约束保证T是基本类型，或者能够隐式转换为QString的自定义类型
-template <class T>
-concept qstr_able =
-    std::is_arithmetic_v<T> || std::is_convertible_v<T, QString>;
+
 // 约束Node必须是Node或者Node的子类，且Node的val必须是算术类型或者能够隐式转化为string
+
 template <class T>
-concept node_able = requires {
-                      requires std::derived_from<T, Node<typename T::tp>>;
-                    } && qstr_able<typename T::tp>;
+concept node_able =
+    requires { requires std::derived_from<T, _baseNode<typename T::tp>>; };
 
 /*------------------------------------------------------------
 --------------------------------------------------------------
@@ -68,6 +50,54 @@ concept node_able = requires {
 --------------------------------------------------------------
 --------------------------------------------------------------
 */
+#ifndef NODECOLOR
+#define NODECOLOR
+enum class NodeColor {
+  yellow,
+  green,
+  pink,
+  black,
+};
+#endif
+struct PosStrNode : _baseNode<_string> {
+  using BaseNode = _baseNode<_string>;
+  using BaseNodePtr = _baseNode<_string> *;
+  using _baseNode<_string>::_baseNode;
+  int row = 0;
+  int col = 0;
+  NodeColor color = NodeColor::yellow;
+  PosStrNode() = default;
+  // PosStrNode(const QString &val, PosStrNode *_left = nullptr,
+  //            PosStrNode *_right = nullptr)
+  //     : BaseNode(val, _left, _right){};
+  explicit PosStrNode(NodeColor color) : BaseNode() { this->color = color; }
+  PosStrNode(int row, int col, NodeColor color)
+      : row(row), col(col), color(color) {}
+  void setPos(int x, int y) {
+    row = x;
+    col = y;
+  }
+  void setColor(NodeColor _color) { color = _color; }
+  void setPosColor(int row, int col, NodeColor color) {
+    this->row = row;
+    this->col = col;
+    this->color = color;
+  }
+  void setPosColor(const PosStrNode &other) {
+    row = other.row;
+    col = other.col;
+    color = other.color;
+  }
+  PosStrNode *Left() { return static_cast<PosStrNode *>(left); }
+  PosStrNode *Right() { return static_cast<PosStrNode *>(right); }
+  void setLeft(BaseNodePtr _left) { this->left = _left; }
+  void setRight(BaseNodePtr _right) { this->right = _right; }
+};
+using NodePtr = PosStrNode*;
+using BaseNodePtr = _baseNode<_string>*;
+using Node = PosStrNode;
+using BaseNode = _baseNode<_string>;
+
 
 template <node_able NodeT> struct BinaryTree {
   enum class Direction {
@@ -76,11 +106,11 @@ template <node_able NodeT> struct BinaryTree {
   };
 
   using val_type = typename NodeT::tp;
-  using Node_ = NodeT;
+  using Node = NodeT;
   using NodePtr = NodeT *;
   virtual void create_tree() = 0;
   // 拷贝树 ---深拷贝
-  virtual void copy_tree(const BinaryTree &other) = 0;
+  // virtual void init_tree(const BinaryTree &other) = 0;
   // 获得头节点
   virtual NodePtr get_head() const = 0;
   // 前序遍历

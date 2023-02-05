@@ -10,9 +10,8 @@ namespace Ui {
 class mainwin;
 }
 QT_END_NAMESPACE
-#include <TreeHead.hpp>
-
 #include "GrapItemManager.h"
+#include <BinaryTreeStr.hpp>
 class QGraphicsScene;
 class QPointF;
 class GrapNodeItem;
@@ -20,9 +19,7 @@ class QGraphicsLineItem;
 class GrapLineItem;
 class QGraphicsItem;
 
-// template <class T> struct Node;
-// template <class T> struct MyTree;
-using NodePtr = Node<int> *;
+
 class MainWin : public QWidget {
   Q_OBJECT
 public:
@@ -32,9 +29,8 @@ public:
 
 private:
   void print_tree(NodePtr head);
-  QPointF gridToCoordinate(int x, int y);
   Ui::mainwin *ui;
-  TreeHead<Node<int>> *tree;
+  BinaryTreeStr *tree;
   QGraphicsItem *ball;
   QGraphicsScene *scene;
   std::shared_ptr<GrapItemManager> grapPool;
@@ -45,7 +41,5 @@ private slots:
   void btn_reverse_clicked();
   void animate_foreach();
 };
-
-
 
 #endif // WIDGET_H
