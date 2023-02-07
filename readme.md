@@ -41,7 +41,8 @@ https://www.cnblogs.com/alex-space/p/13343049.html
 class TempCtrl : public QWidget
 {
     Q_OBJECT
-    Q_PROPERTY(int m_interval READ getInterval WRITE setInterval)
+    //属性并不是名字必须是那个字段名
+    Q_PROPERTY(int xxx READ getInterval WRITE setInterval)
 public:
     int     m_interval=1;
     int     getInterval();
@@ -55,3 +56,39 @@ public:
 
 路径QPainterPath
 https://haigear.blog.csdn.net/article/details/128722830?spm=1001.2101.3001.6661.1&utm_medium=distribute.pc_relevant_t0.none-task-blog-2%7Edefault%7EOPENSEARCH%7ERate-1-128722830-blog-109601422.pc_relevant_recovery_v2&depth_1-utm_source=distribute.pc_relevant_t0.none-task-blog-2%7Edefault%7EOPENSEARCH%7ERate-1-128722830-blog-109601422.pc_relevant_recovery_v2&utm_relevant_index=1
+
+
+## QPropertyAnimation
+```c
+QPropertyAnimation *am1 = new QPropertyAnimation(ball, "rotation");
+//这个表示动画结束析构am1
+am1->start(QPropertyAnimation::DeleteWhenStopped);
+
+```
+
+## QParallelAnimationGroup
+一组动画，并行
+```c
+    QPropertyAnimation *am1 = new QPropertyAnimation(ball, "pos");
+  QPropertyAnimation *am2 = new QPropertyAnimation(ball, "rotation");
+  QParallelAnimationGroup *group = new QParallelAnimationGroup();
+  group->addAnimation(am1);
+  group->addAnimation(am2);
+  am1->setDuration(10000);
+  am1->setEndValue(QPointF{0, 0});
+  am2->setDuration(10000);
+  am2->setStartValue(0);
+  am2->setEndValue(1800);
+  auto vt = tree->foreach_front();
+  int sz = vt.size();
+  for (double i = 0; i < sz; ++i) {
+    am1->setKeyValueAt(i / sz, vt[i]->Pos());
+  }
+  connect(am1, &QPropertyAnimation::valueChanged, this,
+          [this](const QVariant &value) { this->scene->update(); });
+    // 这个不但会析构 析构group本身，还会析构am1 am2
+  group->start(QPropertyAnimation::DeleteWhenStopped);
+
+```
+
+## windowOpacity(透明度) 属性

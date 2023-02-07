@@ -8,8 +8,15 @@ set(CMAKE_PREFIX_PATH "C:/Qt/6.4.2/mingw_64") # 设置qt动态库的路径
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
-#添加定义，是否使用标准容器
-add_compile_definitions(USE_STL_VECTOR=1)
+
+
+# option(WRITING "内部使用" OFF)
+# if(WRITING)
+# #添加定义，是否使用标准容器
+#     add_compile_definitions(USE_STL_VECTOR=0)
+#     include_directories(${CMAKE_CURRENT_LIST_DIR}/BinaryTree/container)
+# endif()
+
 include_directories(
     ./
     ${CMAKE_CURRENT_LIST_DIR}/BinaryTree

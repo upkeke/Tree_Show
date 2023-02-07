@@ -1,41 +1,9 @@
-﻿// author : keke
-// date : 2023/01/27
+﻿
 #pragma once
 #ifndef __BINARYTREE__
 #define __BINARYTREE__
-#include <config.h>
-#include <set>
-#include <type_traits>
-
-
-#if HAS_QSTRING
-template <class T>
-concept str_able =
-    std::is_arithmetic_v<T> || std::is_convertible_v<T, std::string> ||
-    std::is_same_v<T, QString>;
-using _string = QString;
-#else
-using _string = string;
-template <class T>
-concept str_able =
-    std::is_arithmetic_v<T> || std::is_convertible_v<T, std::string>;
-#endif
-template <str_able T> struct _baseNode {
-  _baseNode(const T &val, _baseNode *left = nullptr, _baseNode *right = nullptr)
-      : val(val), left(left), right(right) {}
-  _baseNode() = default;
-  T val;
-  _baseNode *left;
-  _baseNode *right;
-  using tp = T;
-};
-// 约束保证T是基本类型，或者能够隐式转换为QString的自定义类型
-
-// 约束Node必须是Node或者Node的子类，且Node的val必须是算术类型或者能够隐式转化为string
-
-template <class T>
-concept node_able =
-    requires { requires std::derived_from<T, _baseNode<typename T::tp>>; };
+#include "Node_temp.hpp"
+#include <unordered_set>
 
 /*------------------------------------------------------------
 --------------------------------------------------------------
@@ -50,15 +18,10 @@ concept node_able =
 --------------------------------------------------------------
 --------------------------------------------------------------
 */
-#ifndef NODECOLOR
-#define NODECOLOR
-enum class NodeColor {
-  yellow,
-  green,
-  pink,
-  black,
-};
-#endif
+#include <QPointF>
+
+class GrapNodeItem;
+using NodeColor = Qt::GlobalColor;
 struct PosStrNode : _baseNode<_string> {
   using BaseNode = _baseNode<_string>;
   using BaseNodePtr = _baseNode<_string> *;
@@ -67,17 +30,23 @@ struct PosStrNode : _baseNode<_string> {
   int col = 0;
   NodeColor color = NodeColor::yellow;
   PosStrNode() = default;
-  // PosStrNode(const QString &val, PosStrNode *_left = nullptr,
-  //            PosStrNode *_right = nullptr)
-  //     : BaseNode(val, _left, _right){};
   explicit PosStrNode(NodeColor color) : BaseNode() { this->color = color; }
   PosStrNode(int row, int col, NodeColor color)
       : row(row), col(col), color(color) {}
+  PosStrNode(const QPointF &pos, NodeColor color)
+      : row(pos.x()), col(pos.y()), color(color) {}
   void setPos(int x, int y) {
     row = x;
     col = y;
   }
+  void setPos(const QPointF &pos) {
+    row = pos.x();
+    col = pos.y();
+  }
+  QPointF Pos() const { return QPointF(row, col); }
+
   void setColor(NodeColor _color) { color = _color; }
+
   void setPosColor(int row, int col, NodeColor color) {
     this->row = row;
     this->col = col;
@@ -88,16 +57,19 @@ struct PosStrNode : _baseNode<_string> {
     col = other.col;
     color = other.color;
   }
+  /**
+   * @brief 需要强转一下
+   如果直接this->left 的类型是_baseNode<_string> *;
+   * 
+   * @return PosStrNode* 
+   */
   PosStrNode *Left() { return static_cast<PosStrNode *>(left); }
   PosStrNode *Right() { return static_cast<PosStrNode *>(right); }
-  void setLeft(BaseNodePtr _left) { this->left = _left; }
-  void setRight(BaseNodePtr _right) { this->right = _right; }
 };
-using NodePtr = PosStrNode*;
-using BaseNodePtr = _baseNode<_string>*;
+using NodePtr = PosStrNode *;
+using BaseNodePtr = _baseNode<_string> *;
 using Node = PosStrNode;
 using BaseNode = _baseNode<_string>;
-
 
 template <node_able NodeT> struct BinaryTree {
   enum class Direction {
@@ -109,8 +81,6 @@ template <node_able NodeT> struct BinaryTree {
   using Node = NodeT;
   using NodePtr = NodeT *;
   virtual void create_tree() = 0;
-  // 拷贝树 ---深拷贝
-  // virtual void init_tree(const BinaryTree &other) = 0;
   // 获得头节点
   virtual NodePtr get_head() const = 0;
   // 前序遍历
@@ -139,7 +109,7 @@ template <node_able NodeT> struct BinaryTree {
   // 反转左右子树
   virtual void reverse_tree() = 0;
   // 获得所有叶子
-  virtual std::set<NodePtr> get_leaves() const = 0;
+  virtual std::unordered_set<NodePtr> get_leaves() const = 0;
   // 销毁树
   virtual void destroy_tree() = 0;
   // 空

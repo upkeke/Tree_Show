@@ -1,8 +1,8 @@
-﻿// author : keke
-// date : 2023/01/30
+﻿
+
 #pragma once
-#ifndef __MYGRAPHICSITEM__
-#define __MYGRAPHICSITEM__
+#ifndef __GRAPNODEITEM__
+#define __GRAPNODEITEM__
 
 #include <QGraphicsItem>
 class GrapLineItem;
@@ -10,56 +10,76 @@ class GrapLineItem;
 #include <QPen>
 #include <config.h>
 
-#ifndef NODECOLOR
-#define NODECOLOR
-enum class NodeColor {
-  yellow,
-  green,
-  pink,
-  black,
-};
-#endif
-using NodePtr = PosStrNode*;
 class GrapNodeItem : public QObject, public QGraphicsItem {
   Q_OBJECT
   Q_INTERFACES(QGraphicsItem)
-  Q_PROPERTY(_string val READ getVal WRITE setVal)
+  /**
+   * @brief 添加缩放属性
+   *
+   * @param setScale
+   */
+  Q_PROPERTY(qreal scale READ scale WRITE setScale)
 public:
-  // https://blog.csdn.net/kenfan1647/article/details/116991074
-
-  explicit GrapNodeItem(NodePtr nodeptr,
-                        QGraphicsItem *parent = nullptr);
+  friend class GrapItemManager;
   /**
    * @brief 重新设置图元的位置，颜色
    *
    * @param node 根据的节点
    */
   void reSet(NodePtr nodeptr);
-  void setVal(const QString &num);
-  QString getVal();
-  void addLine(GrapLineItem *);
-  int reMoveLines(); // 与当前图元连接的直线图元全部隐藏，并返回移出的个数
+  void setVal(const _string &num);
+  /**
+   * @brief 发现一个直线和图元相连。把它添加到lineArry
+   *
+   * @param line
+   */
+  void addLine(GrapLineItem *line);
+  /**
+   * @brief 清空lineArry，并隐藏
+   *
+   * @return int
+   */
+  int reMoveLines();
+  /**
+   * @brief 清空lineArry，不隐藏
+   *
+   */
   void clearLines(); // 这个只是清空lineArry，但不隐藏其中的图元
   void paint(QPainter *painter, const QStyleOptionGraphicsItem *option,
              QWidget *widget) override;
   QRectF boundingRect() const override;
 
   virtual void mouseMoveEvent(QGraphicsSceneMouseEvent *event) override;
-  void setBackColor(NodeColor pix_c);
-  void advance(int phase) override;
+  /**
+   * @brief Set the Back Color
+   *
+   * @param col
+   */
+  void setBackColor(NodeColor col);
   /**
    * @brief 设置图元的实际宽
    * 图片传进来后会进行收缩，这个变量是缩放后图元的宽
    * @param order_h
    */
-  void toHeight(int order_h = 30);
+  void setRadius(int order_h = 30);
 
 private:
-  // QPointF lt{0, 0}; // 左上角的坐标 相对于自己的坐标系
-  QPixmap pix;                            // 图元的背景图片
-  _SPC vector<GrapLineItem *> lineArry{}; // 与当前图元连接的图元集合
+  /**
+   * @brief 禁止外界构造，只能通过GrapItemManager构造
+   *
+   * @param nodeptr 传入节点指针
+   * @param parent
+   */
+  explicit GrapNodeItem(NodePtr nodeptr, QGraphicsItem *parent = nullptr);
+
+  /**
+   * @brief 与节点图元连接的直线图元
+   *
+   */
+  _SPC vector<GrapLineItem *> lineArry{};
   QPen pen{Qt::black};
   NodePtr nodeptr = nullptr;
   _string val;
+  int radius = 15;
 };
 #endif

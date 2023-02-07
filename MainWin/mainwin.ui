@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>448</width>
-    <height>343</height>
+    <width>712</width>
+    <height>477</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -25,13 +25,6 @@
       </attribute>
       <layout class="QVBoxLayout" name="verticalLayout">
        <item>
-        <widget class="QPushButton" name="btn_build">
-         <property name="text">
-          <string>生成</string>
-         </property>
-        </widget>
-       </item>
-       <item>
         <spacer name="verticalSpacer">
          <property name="orientation">
           <enum>Qt::Vertical</enum>
@@ -43,6 +36,13 @@
           </size>
          </property>
         </spacer>
+       </item>
+       <item>
+        <widget class="QPushButton" name="btn_build">
+         <property name="text">
+          <string>生成</string>
+         </property>
+        </widget>
        </item>
        <item>
         <widget class="QComboBox" name="cb_foreach">
@@ -61,12 +61,38 @@
            <string>后序</string>
           </property>
          </item>
+         <item>
+          <property name="text">
+           <string>层级</string>
+          </property>
+         </item>
         </widget>
        </item>
        <item>
         <widget class="QPushButton" name="btn_foreach">
          <property name="text">
           <string>遍历</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="btn_leave">
+         <property name="text">
+          <string>显示叶子节点</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="btn_reverse">
+         <property name="text">
+          <string>反转</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="btn_clear">
+         <property name="text">
+          <string>清空</string>
          </property>
         </widget>
        </item>
@@ -89,14 +115,7 @@
           <string/>
          </property>
          <property name="pixmap">
-          <pixmap resource="res.qrc">:/m/img/green.jpg</pixmap>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QPushButton" name="btn_reverse">
-         <property name="text">
-          <string>反转</string>
+          <pixmap>:/m/img/green.jpg</pixmap>
          </property>
         </widget>
        </item>
@@ -114,9 +133,6 @@
    </item>
   </layout>
  </widget>
- <resources>
-  <include location="res.qrc"/>
-  <include location="res.qrc"/>
- </resources>
+ <resources/>
  <connections/>
 </ui>

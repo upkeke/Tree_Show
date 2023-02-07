@@ -1,10 +1,9 @@
 ﻿#include "GrapItemManager.h"
 #include "GrapLineItem.h"
+#include "GrapMoveItem.h"
 #include "GrapNodeItem.h"
 #include <BinaryTree.hpp>
 #include <QGraphicsScene>
-
-// #include <container.h>
 
 GrapItemManager::GrapItemManager(QGraphicsScene *scene)
     : grapNodePool(), curNodeindex(0), grapLinePool(), curLineIndex(0),
@@ -13,10 +12,8 @@ GrapItemManager::GrapItemManager(QGraphicsScene *scene)
 std::shared_ptr<GrapItemManager>
 GrapItemManager::instance(QGraphicsScene *scene) {
   if (ItemManager == nullptr) {
-    // ItemManager = std::make_shared<GrapItemManager>();
     ItemManager = std::shared_ptr<GrapItemManager>(new GrapItemManager(scene));
   }
-
   return ItemManager;
 }
 GrapNodeItem *GrapItemManager::getGrapNode(NodePtr nodeptr) {
@@ -30,15 +27,18 @@ GrapNodeItem *GrapItemManager::getGrapNode(NodePtr nodeptr) {
     item = grapNodePool[curNodeindex];
     item->reSet(nodeptr);
   }
+  nodeToGrapNode[nodeptr] = item;
   curNodeindex++;
   item->show();
   item->clearLines();
   return item;
 }
-
-size_t GrapItemManager::grapNodeSize() { return grapNodePool.size(); }
-size_t GrapItemManager::grapIndexSize() { return grapLinePool.size(); }
-
+GrapNodeItem *GrapItemManager::whereGrapNode(NodePtr nodeptr) {
+  if (nodeToGrapNode.contains(nodeptr)) {
+    return nodeToGrapNode[nodeptr];
+  }
+  return nullptr;
+}
 GrapLineItem *GrapItemManager::getGrapLine(GrapNodeItem *front,
                                            GrapNodeItem *end) {
   auto temp = grapLinePool.size();
@@ -59,6 +59,7 @@ GrapLineItem *GrapItemManager::getGrapLine(GrapNodeItem *front,
 void GrapItemManager::hideSurplus() {
   for (size_t i = curNodeindex; i < grapNodePool.size(); ++i) {
     grapNodePool[i]->hide();
+    nodeToGrapNode.erase(grapNodePool[i]->nodeptr);
   }
   for (size_t i = curLineIndex; i < grapLinePool.size(); ++i) {
     grapLinePool[i]->hide();
@@ -78,4 +79,18 @@ void GrapItemManager::hideAll() {
   scene->update();
 }
 
+GrapMoveItem *GrapItemManager::getGrapMove(const QPointF &pos) {
+  auto temp = grapMovePool.size();
+  GrapMoveItem *item = nullptr;
+  if (curLineIndex == temp) {
+    item = new GrapMoveItem(pos);
+    scene->addItem(item);
+    grapMovePool.push_back(item);
+  } else {
+    item = grapMovePool[curMoveIndex];
+  }
+  curMoveIndex++;
+  item->show();
+  return item;
+}
 GrapItemManager::~GrapItemManager() {}

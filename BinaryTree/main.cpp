@@ -1,11 +1,12 @@
 ﻿
-// #include "data_source.h"
 #include "BinaryTreeStr.hpp"
+#include "get_test_data.h"
 #include <compare>
 #include <container.hpp>
 #include <iostream>
 #include <queue>
 #include <stack>
+
 
 using std::strong_ordering;
 
@@ -82,9 +83,21 @@ void func1() {
 
 #include <QDebug>
 #include <vector>
-
+struct xxk {
+  int a;
+};
+void func2() {
+  // ok
+  auto f1 = [x = xxk{1}](int n) { return x.a + n; };
+  std::cout << f1(12); // 13
+}
+void func3() {
+  auto arr = get_vector<QString>(12);
+  for (auto x : arr)
+    qDebug() << x;
+}
 int main(int argc, char *argv[]) {
-  func1();
+  func3();
   return 0;
 }
 

@@ -3,15 +3,16 @@
 #include <QGraphicsScene>
 #include <QPainter>
 #include <QString>
+#include <config.h>
 
 namespace {
-QString getPixFile(const NodeColor &pix_c) {
-  QString str;
+_string getPixFile(const NodeColor &pix_c) {
+  _string str;
   switch (pix_c) {
   case NodeColor::yellow:
     str = "yellow";
     break;
-  case NodeColor::pink:
+  case NodeColor::red:
     str = "pink";
     break;
   case NodeColor::green:
@@ -20,19 +21,17 @@ QString getPixFile(const NodeColor &pix_c) {
   default:
     break;
   }
-  return QString(":/m/img/%1.jpg").arg(str);
+#if HAS_QSTRING
+  return _string(":/m/img/%1.jpg").arg(str);
+#else
+  return ":/m/img/" + str + ".jpg";
+#endif
 }
-
-// QPointF gridToCoor(const Pos &ps,const QPointF &pt) {
-
-//   return QPointF(x * 40, y * 60); }
 
 } // namespace
 
 GrapNodeItem::GrapNodeItem(NodePtr nodeptr, QGraphicsItem *parent)
     : QGraphicsItem{parent}, nodeptr(nodeptr) {
-  pix.load(getPixFile(nodeptr->color));
-  toHeight();
   setFlag(QGraphicsItem::ItemIsMovable);
   setFlag(QGraphicsItem::ItemIsSelectable);
 
@@ -42,30 +41,26 @@ GrapNodeItem::GrapNodeItem(NodePtr nodeptr, QGraphicsItem *parent)
 void GrapNodeItem::paint(QPainter *painter,
                          const QStyleOptionGraphicsItem *option,
                          QWidget *widget) {
-  if (nodeptr->color == NodeColor::green ||
-      nodeptr->color == NodeColor::yellow) {
-    painter->drawPixmap(boundingRect().topLeft(), pix); // 高度 30
-  } else {
-    if (nodeptr->color == NodeColor::pink) {
-      painter->setBrush(Qt::red);
-    } else {
-      painter->setBrush(Qt::black);
-    }
-    painter->drawEllipse(QPointF(0, 0), 15, 15);
-  }
-  QFont font("微软雅黑", 15);
+  painter->setBrush(nodeptr->color);
+  painter->drawEllipse(QPointF(0, 0), radius, radius);
+
   painter->setPen(pen);
-  painter->setFont(font);
+
+  painter->setFont(QFont("微软雅黑", 15));
+#if HAS_QSTRING
   painter->drawText(boundingRect(), Qt::AlignCenter, nodeptr->val);
+#else
+  painter->drawText(boundingRect(), Qt::AlignCenter,
+                    QString::fromStdString(nodeptr->val));
+
+#endif
 }
 
-void GrapNodeItem::setVal(const QString &num) {
+void GrapNodeItem::setVal(const _string &num) {
   nodeptr->val = num;
   nodeptr->val = num;
   scene()->update();
 }
-
-QString GrapNodeItem::getVal() { return nodeptr->val; }
 
 void GrapNodeItem::addLine(GrapLineItem *line) { lineArry.push_back(line); }
 
@@ -81,43 +76,27 @@ int GrapNodeItem::reMoveLines() {
 void GrapNodeItem::clearLines() { lineArry.clear(); }
 
 QRectF GrapNodeItem::boundingRect() const {
-  QSize tp = pix.size() / 2;
-  QPointF lt(-tp.width(), -tp.height());
-  return QRectF(lt, QSizeF(pix.width(), pix.height()));
-  // return QRectF(QPointF(0,0), QSizeF(pix.width(), pix.height()));
+  return QRectF(QPointF(-radius, -radius), QSizeF(radius * 2, radius * 2));
 }
 
 void GrapNodeItem::mouseMoveEvent(QGraphicsSceneMouseEvent *event) {
   QGraphicsItem::mouseMoveEvent(event);
-  if (this->isSelected())
+  if (this->isSelected()) {
+    nodeptr->setPos(pos());
     this->scene()->update();
+  }
 }
-
 void GrapNodeItem::setBackColor(NodeColor ncolor) {
   nodeptr->color = ncolor;
-
-  if (nodeptr->color == NodeColor::green ||
-      nodeptr->color == NodeColor::yellow) {
-    pix.load(getPixFile(ncolor));
-    pix = pix.scaledToHeight(30);
-  }
-
   if (nodeptr->color == NodeColor::black)
     this->pen.setColor(Qt::white);
   else
     this->pen.setColor(Qt::black);
 }
 
-void GrapNodeItem::advance(int phase) {
-  QGraphicsItem::advance(phase);
-  return;
-  if (phase == 0)
-    return;
-  // 每次向左移2 向下移1
-  setPos(mapToScene(2, 1));
-}
 void GrapNodeItem::reSet(NodePtr nodeptr) {
   this->nodeptr = nodeptr;
-  this->setPos(QPointF(nodeptr->row, nodeptr->col));
 }
-void GrapNodeItem::toHeight(int order_h) { pix = pix.scaledToHeight(order_h); }
+void GrapNodeItem::setRadius(int radius) {
+  this->radius = radius;
+}

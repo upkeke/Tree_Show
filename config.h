@@ -1,9 +1,10 @@
-﻿//author : keke
-//date : 2023/02/01 
+﻿
 #pragma once
 #ifndef __MYCONFIG__
 #define __MYCONFIG__
 
+
+#define USE_STL_VECTOR 1
 #if USE_STL_VECTOR
 #define _SPC std::
 #include <vector>
@@ -14,11 +15,14 @@
 #include<container.hpp>
 #endif
 
-#define HAS_QSTRING 1
+#define HAS_QSTRING 0
 #if HAS_QSTRING
 #include<QString>
+using _string = QString;
 #else
 #include<string>
 using std::string;
+using _string = string;
 #endif
+
 #endif

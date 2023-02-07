@@ -1,5 +1,4 @@
-﻿// author : keke
-// date : 2023/02/05
+﻿
 #pragma once
 #ifndef __BINARYTREESTR__
 #define __BINARYTREESTR__
@@ -9,22 +8,16 @@
 #include <QPointF>
 #include <functional>
 
-
-//extern void update_xy(PosStrNode *head, int scale_row, int scale_col);
 struct BinaryTreeStr : BinaryTree<PosStrNode> {
-
-  // using typename BinaryTree<PosStrNode>::Node;
-  // using typename BinaryTree<PosStrNode>::NodePtr;
   using typename BinaryTree<PosStrNode>::Direction;
   using typename BinaryTree<PosStrNode>::val_type;
   using BaseNodeStr = _baseNode<_string>;
-  // using _baseNodePtr =typename _baseNode<_string> *;
   using BaseNodeStrPtr = BaseNodeStr *;
   using Node = PosStrNode;
   using NodePtr = PosStrNode *;
   NodePtr head = nullptr;
   /**
-   * @brief 放大比例
+   * @brief 比例尺
    * 对于Node的row和col不能直接使用，需要进行方法
    */
   int scale_row = 40;
@@ -38,7 +31,11 @@ struct BinaryTreeStr : BinaryTree<PosStrNode> {
     // vector<int> data = get_vector_norepeat(10);
     _SPC vector<_string> data(7);
     for (int i = 0; i < 7; ++i) {
-      data[i] = QString::number(i);
+#if HAS_QSTRING
+      data[i] = _string::number(i);
+#else
+      data[i] = std::to_string(i);
+#endif
     }
     head = new Node(data[0]);
     _SPC queue<NodePtr> qe;
@@ -56,10 +53,9 @@ struct BinaryTreeStr : BinaryTree<PosStrNode> {
       temp->right = new Node(data[i++]);
       // qe.push(static_cast<NodePtr>(temp->right));
       qe.push(temp->Right());
-      qe.pop();
+      qe.pop();       
     }
     ::update_xy(head, scale_row, scale_col);
-    //::update_xy(head, scale_row, scale_col);
   }
   /**
    * @brief 传入其他类型的Node指针
@@ -71,9 +67,10 @@ struct BinaryTreeStr : BinaryTree<PosStrNode> {
    */
   template <str_able tp> void init_tree(_baseNode<tp> *nodeptr) {
     // 后序遍历复制
-    std::function<NodePtr(_baseNode<tp> *)> func = [&](_baseNode<tp> *_head) {
+    std::function<NodePtr(_baseNode<tp> *)> func = [&](_baseNode<tp> *_head)->NodePtr {
       if (_head == nullptr)
-        return _head;
+        //return static_cast<NodePtr>(nullptr) ;
+        return nullptr ;
       NodePtr _left = func(_head->left);
       NodePtr _right = func(_head->right);
 #if HAS_QSTRING
@@ -111,8 +108,6 @@ struct BinaryTreeStr : BinaryTree<PosStrNode> {
         [](NodePtr cur, _SPC vector<NodePtr> &_re) { _re.push_back(cur); }, re);
     return re;
   }
-  // 后序遍历 如果取出的上一个节点是栈顶的right，就可以取出栈顶
-  // 如果不是 就进入右子树
   _SPC vector<NodePtr> foreach_back() const override {
     _SPC vector<NodePtr> re;
     ::foreach_back(
@@ -217,11 +212,11 @@ struct BinaryTreeStr : BinaryTree<PosStrNode> {
                     [](NodePtr cur) { std::swap(cur->left, cur->right); });
     ::update_xy(head, scale_row, scale_col);
   }
-  std::set<NodePtr> get_leaves() const override {
-    std::set<NodePtr> re;
+  std::unordered_set<NodePtr> get_leaves() const override {
+    std::unordered_set<NodePtr> re;
     ::foreach_front(
         head,
-        [](NodePtr cur, std::set<NodePtr> &_re) {
+        [](NodePtr cur, std::unordered_set<NodePtr> &_re) {
           if (cur->left == nullptr && cur->right == nullptr) {
             _re.insert(cur);
           }
