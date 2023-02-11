@@ -2,5 +2,9 @@
 .cache
 .vscode
 MainWin/弃用
+MainWin/test
 BinaryTree/弃用
+*.png
+*.psd
+*.jpg
 //.gitignore

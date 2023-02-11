@@ -1,76 +1,75 @@
 ﻿#include "mainwin.h"
-#include "ui_mainwin.h"
+#include "ui_BinaryTreeWin.h"
 #include <GrapLineItem.h>
 #include <GrapMoveItem.h>
 #include <GrapNodeItem.h>
+#include <GrapUi.h>
+#include <QAction>
 #include <QDebug>
 #include <QParallelAnimationGroup>
 #include <QPropertyAnimation>
 #include <cmath>
 
-qreal disBtwItem(const QPointF &p1, const QPointF &p2) {
-  auto p = p1 - p2;
-
-  return std::sqrt(p.rx() * p.rx() + p.y() * p.y());
-}
+using namespace sbt;
 
 MainWin::MainWin(QWidget *parent)
-    : QWidget(parent), ui(new Ui::mainwin), tree(new BinaryTreeStr) {
+    : QMainWindow(parent), ui(new Ui::BinaryTreeWin),
+      tree(new sbt::BinaryTreeStr) {
   ui->setupUi(this);
-  init_win();
+  scene = new QGraphicsScene(this);
+  // test1();
   ui->view->setScene(scene); // QGraphicsView
   ui->view->show();
-  connect(ui->btn_build, &QPushButton::clicked, this,
-          &MainWin::btn_build_clicked);
-  connect(ui->btn_reverse, &QPushButton::clicked, this,
-          &MainWin::btn_reverse_clicked);
-  connect(ui->btn_foreach, &QPushButton::clicked, this,
-          &MainWin::btn_foreach_clicked);
-  connect(ui->btn_leave, &QPushButton::clicked, this,
-          &MainWin::btn_leave_clicked);
-  connect(ui->cb_foreach, &QComboBox::currentTextChanged, this,
-          &MainWin::cb_foreach_change);
+  init_pool();
+  connect(ui->actionbuild, &QAction::triggered, this,
+          &MainWin::action_build_clear);
+  connect(ui->actrefresh, &QAction::triggered, this,
+          &MainWin::action_build_clear);
 }
-void MainWin::init_win() {
-  scene = new QGraphicsScene(this);
+void MainWin::init_pool() {
   grapPool = GrapItemManager::instance(scene);
+  uiPool = GrapUiManager::instance(scene);
   GrapMoveItem *ball = grapPool->getGrapMove(QPointF{-30, -30});
-  move_group = new QParallelAnimationGroup(this);
-  QPropertyAnimation *am1 = new QPropertyAnimation(ball, "pos");
-  QPropertyAnimation *am2 = new QPropertyAnimation(ball, "rotation");
-  move_group->addAnimation(am1);
-  move_group->addAnimation(am2);
-
-  connect(am1, &QPropertyAnimation::valueChanged, this,
-          [this, curIndex = 0](const QVariant &value) mutable {
-            if (curIndex < cur_nodeptr_list.size()) {
-              qreal dis = disBtwItem(cur_nodeptr_list[curIndex]->Pos(),
-                                     value.toPointF());
-              if (dis < 20) {
-                cur_nodeptr_list[curIndex]->setColor(NodeColor::green);
-                // 当五角星靠近图元节点的时候放大节点图元，然后复原
-                QPropertyAnimation *tpanm = new QPropertyAnimation(
-                    this->grapPool->whereGrapNode(cur_nodeptr_list[curIndex]),
-                    "scale");
-                tpanm->setDuration(1000);
-                tpanm->setStartValue(1.0);
-                tpanm->setKeyValueAt(0.5, 1.5);
-                tpanm->setEndValue(1.0);
-                tpanm->setEasingCurve(QEasingCurve::OutBounce);
-                connect(tpanm, &QPropertyAnimation::currentLoopChanged, tpanm,
-                        [tpanm](int currentLoop) {
-                          if (currentLoop == 1) {
-                            tpanm->setDirection(QPropertyAnimation::Backward);
-                          }
-                        });
-                curIndex++;
-                tpanm->start(QPropertyAnimation::DeleteWhenStopped);
-              }
-            } else {
-              curIndex = 0;
-            }
-            this->scene->update();
-          });
+  auto childBtnList = uiPool->ChildBtn();
+  animPool = AnimManager::instance(ball, uiPool->ChildBtn());
+  UiForeachRootBtn *rootBtn = uiPool->RootBtn();
+  // 点击根btn，展开子列表 再次点击是收起
+  connect(
+      rootBtn, &UiForeachRootBtn::RootBtnPress, this,
+      [this](QObject *root) { this->animPool->_遍历列表展开收起动画(root); });
+  // 点击遍历按钮，五角星开始遍历动画
+  for (auto ptr : childBtnList) {
+    connect(ptr, &UiForeachBtn::ChildBtnPress, this,
+            [this, rootBtn](EechOrder order) {
+              this->animPool->_遍历列表展开收起动画(rootBtn);
+              rootBtn->set_order(order);
+              // 开始遍历
+              this->update_cur_nodeptr_list(order);
+              // this->print_tree(tree->get_head());
+              //  开始遍历动画
+              animPool->_五角星遍历动画(this->cur_nodeptr_list, this->grapPool);
+            });
+  }
+  // ui->view->init_Ui(rootBtn);
+}
+void MainWin::update_cur_nodeptr_list(EechOrder order) {
+  cur_nodeptr_list.clear();
+  switch (order) {
+  case EechOrder::先序:
+    cur_nodeptr_list = tree->foreach_front();
+    break;
+  case EechOrder::中序:
+    cur_nodeptr_list = tree->foreach_mid();
+    break;
+  case EechOrder::后序:
+    cur_nodeptr_list = tree->foreach_back();
+    break;
+  case EechOrder::层级:
+    cur_nodeptr_list = tree->foreach_ceng();
+    break;
+  case EechOrder::选择:
+    break;
+  }
 }
 
 MainWin::~MainWin() {
@@ -81,6 +80,9 @@ MainWin::~MainWin() {
 void MainWin::print_tree(NodePtr head) {
   qDebug() << "print_tree is called ";
   std::vector<NodePtr> a节点集合 = tree->foreach_back();
+  if (a节点集合.size() == 0) {
+    return;
+  }
   for (auto ptr : a节点集合) {
     GrapNodeItem *curNodeItem = grapPool->getGrapNode(ptr);
     // 连接父节点到子节点的线
@@ -106,30 +108,29 @@ void MainWin::print_tree(NodePtr head) {
   scene->update();
 }
 
-void MainWin::btn_build_clicked() { print_tree(tree->head); }
+void MainWin::action_build_clear(bool flag) {
+  // flag 初始值是false，在designer的设置，false状态时树图标，true是清空图标
+  // 点击后flag会变成true发射过来，再点击变成false
+  if (flag) {
+    print_tree(tree->head);
+    qDebug() << "build";
+  } else {
+    tree->destroy_tree();
+    ;
+    cur_nodeptr_list.clear();
+    grapPool->hideAll();
+    qDebug() << "clear";
+  }
+}
+void MainWin::action_refresh(bool flag) {
+  
+  animPool->_五角星遍历动画(cur_nodeptr_list, grapPool);
+}
 
 void MainWin::btn_reverse_clicked() {
-  this->tree->reverse_tree();
-  cb_foreach_change(ui->cb_foreach->currentText());
-  this->print_tree(this->tree->head);
-}
-void MainWin::btn_foreach_clicked() {
-  // 控制坐标
-  QPropertyAnimation *am1 =
-      static_cast<QPropertyAnimation *>(move_group->animationAt(0));
-  QPropertyAnimation *am2 =
-      static_cast<QPropertyAnimation *>(move_group->animationAt(1));
-  am1->setDuration(10000);
-  am1->setStartValue(QPointF{-30, -30});
-  am1->setEndValue(QPointF{-30, -30});
-  am2->setDuration(10000);
-  am2->setStartValue(0);
-  am2->setEndValue(1800);
-  int sz = cur_nodeptr_list.size();
-  for (double i = 1; i <= sz; ++i) {
-    am1->setKeyValueAt(i / (sz + 1), cur_nodeptr_list[i - 1]->Pos());
-  }
-  move_group->start();
+  // this->tree->reverse_tree();
+  // cb_foreach_change(ui->cb_foreach->currentText());
+  // this->print_tree(this->tree->head);
 }
 void MainWin::btn_leave_clicked() {
   auto arr = tree->get_leaves();
@@ -155,3 +156,4 @@ void MainWin::cb_foreach_change(const QString &str) {
   }
   scene->update();
 }
+void MainWin::test1() {}

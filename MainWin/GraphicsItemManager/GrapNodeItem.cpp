@@ -2,9 +2,11 @@
 #include "GrapLineItem.h"
 #include <QGraphicsScene>
 #include <QPainter>
+#include <QPainterPath>
 #include <QString>
 #include <config.h>
 
+using namespace sbt;
 namespace {
 _string getPixFile(const NodeColor &pix_c) {
   _string str;
@@ -34,7 +36,7 @@ GrapNodeItem::GrapNodeItem(NodePtr nodeptr, QGraphicsItem *parent)
     : QGraphicsItem{parent}, nodeptr(nodeptr) {
   setFlag(QGraphicsItem::ItemIsMovable);
   setFlag(QGraphicsItem::ItemIsSelectable);
-
+  val = nodeptr->val;
   setPos(QPointF(nodeptr->row, nodeptr->col));
 }
 
@@ -55,7 +57,11 @@ void GrapNodeItem::paint(QPainter *painter,
 
 #endif
 }
-
+QPainterPath GrapNodeItem::shape() const {
+  QPainterPath path;
+  path.addEllipse(QPointF{0, 0}, radius, radius);
+  return path;
+}
 void GrapNodeItem::setVal(const _string &num) {
   nodeptr->val = num;
   nodeptr->val = num;
@@ -82,10 +88,15 @@ QRectF GrapNodeItem::boundingRect() const {
 void GrapNodeItem::mouseMoveEvent(QGraphicsSceneMouseEvent *event) {
   QGraphicsItem::mouseMoveEvent(event);
   if (this->isSelected()) {
+    auto ls = collidingItems();
+    if (ls.size() > 0) {
+      emit andOther(ls[0]);
+    }
     nodeptr->setPos(pos());
     this->scene()->update();
   }
 }
+
 void GrapNodeItem::setBackColor(NodeColor ncolor) {
   nodeptr->color = ncolor;
   if (nodeptr->color == NodeColor::black)
@@ -94,9 +105,5 @@ void GrapNodeItem::setBackColor(NodeColor ncolor) {
     this->pen.setColor(Qt::black);
 }
 
-void GrapNodeItem::reSet(NodePtr nodeptr) {
-  this->nodeptr = nodeptr;
-}
-void GrapNodeItem::setRadius(int radius) {
-  this->radius = radius;
-}
+void GrapNodeItem::reSet(NodePtr nodeptr) { this->nodeptr = nodeptr; }
+void GrapNodeItem::setRadius(int radius) { this->radius = radius; }

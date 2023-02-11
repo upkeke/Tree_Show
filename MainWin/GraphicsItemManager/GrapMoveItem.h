@@ -3,10 +3,11 @@
 #ifndef __GRAPMOVEITEM__
 #define __GRAPMOVEITEM__
 
+#include "Grap_Bin.h"
 #include <QGraphicsItem>
 #include <config.h>
 
-class GrapMoveItem : public QObject, public QGraphicsItem {
+class GRAP_LIB_EXPORT GrapMoveItem : public QObject, public QGraphicsItem {
   Q_OBJECT
   Q_INTERFACES(QGraphicsItem)
   /**
@@ -16,16 +17,14 @@ class GrapMoveItem : public QObject, public QGraphicsItem {
   Q_PROPERTY(QPointF pos READ pos WRITE setPos)
   /**
    * @brief 注册旋转属性
-   * 
+   *
    */
   Q_PROPERTY(qreal rotation READ rotation WRITE setRotation)
 public:
   GrapMoveItem() : QGraphicsItem(nullptr) { setZValue(3); }
-  explicit GrapMoveItem(QPointF mPos, QGraphicsItem *parent = nullptr)
-      : QGraphicsItem(parent) {
-    setPos(mPos);
-    setZValue(3);
-  }
+  explicit GrapMoveItem(QPointF mPos, QGraphicsItem *parent = nullptr);
+  void contextMenuEvent(QGraphicsSceneContextMenuEvent *event) override;
+  // 讲解contextM
   void paint(QPainter *painter, const QStyleOptionGraphicsItem *option,
              QWidget *widget = nullptr) override;
   /**
@@ -33,11 +32,13 @@ public:
    *
    * @param radius
    */
-  void setRadius(int radius) { this->radius = radius; }
+  void setRadius(int radius);
   QRectF boundingRect() const override;
+  QPainterPath shape() const override;
 
 private:
   int radius = 20;
+  QList<QPointF> wu;
 };
 
 #endif

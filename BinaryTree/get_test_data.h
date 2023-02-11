@@ -3,7 +3,7 @@
 #pragma once
 #ifndef __GET_TEST_DATA__
 #define __GET_TEST_DATA__
-#include <BinaryTree.hpp>
+#include <NodeStr.hpp>
 #include <QString>
 #include <config.h>
 
@@ -16,5 +16,5 @@ template <> _SPC vector<int> get_vector<int>(size_t sz);
 template <> _SPC vector<char> get_vector<char>(size_t sz);
 template <> _SPC vector<QPointF> get_vector<QPointF>(size_t sz);
 
-template <> _SPC vector<NodePtr> get_vector<NodePtr>(size_t sz);
+template <> _SPC vector<sbt::NodePtr> get_vector<sbt::NodePtr>(size_t sz);
 #endif

@@ -92,3 +92,19 @@ am1->start(QPropertyAnimation::DeleteWhenStopped);
 ```
 
 ## windowOpacity(透明度) 属性
+
+## 碰撞检测 collision detection
+https://blog.csdn.net/weixin_51965272/article/details/124066364
+
+## QObject::connect: signal not found in Lib
+https://blog.csdn.net/zzwdkxx/article/details/105477367
+动态库要导出
+#ifdef LIBRARY
+#define LIB_EXPORT Q_DECL_EXPORT
+#else
+#define LIB_EXPORT Q_DECL_IMPORT
+#endif
+
+## 临时想法
+QGraphicsEffect 特效
+把一些图元放在一个组里

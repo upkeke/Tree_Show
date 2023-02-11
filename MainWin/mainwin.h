@@ -2,14 +2,20 @@
 #ifndef __MAINWIN__
 #define __MAINWIN__
 
+#include <QMainWindow>
 #include <QWidget>
+
 QT_BEGIN_NAMESPACE
 namespace Ui {
-class mainwin;
+class BinaryTreeWin;
 }
 QT_END_NAMESPACE
 #include "GrapItemManager.h"
+#include <AnimManager.h>
 #include <BinaryTreeStr.hpp>
+#include <GrapUiManager.h>
+#include <NodeTemp.hpp>
+
 class QGraphicsScene;
 class QPointF;
 class GrapNodeItem;
@@ -19,12 +25,12 @@ class QGraphicsItem;
 class GrapMoveItem;
 class QParallelAnimationGroup;
 class QPropertyAnimation;
-class MainWin : public QWidget {
+enum class EechOrder;
+class MainWin : public QMainWindow {
   Q_OBJECT
 public:
   MainWin(QWidget *parent = nullptr);
-  template <str_able tp = int>
-  void set_node_head(_baseNode<tp> *head = nullptr) {
+  template <node_able NodeTy> void set_node_head(NodeTy *head = nullptr) {
     if (head == nullptr) {
       tree->create_tree();
     } else {
@@ -36,28 +42,25 @@ public:
   ~MainWin();
 
 private:
-  void print_tree(NodePtr head);
-  void init_win();
+  void print_tree(sbt::NodePtr head);
+  void init_pool();
 
-  _SPC vector<NodePtr> cur_nodeptr_list;
-  Ui::mainwin *ui = nullptr;
-  BinaryTreeStr *tree = nullptr;
+  void update_cur_nodeptr_list(EechOrder order);
+
+  _SPC vector<sbt::NodePtr> cur_nodeptr_list;
+  Ui::BinaryTreeWin *ui = nullptr;
+  sbt::BinaryTreeStr *tree = nullptr;
 
   QGraphicsScene *scene = nullptr;
   std::shared_ptr<GrapItemManager> grapPool = nullptr;
-  /**
-   * @brief 五角星的移动动画
-   目前限定五角星只有2个动作，禁止随意添加动作
-   *
-   */
-  QParallelAnimationGroup *move_group = nullptr;
-
+  std::shared_ptr<AnimManager> animPool = nullptr;
+  std::shared_ptr<GrapUiManager> uiPool = nullptr;
 private slots:
-  void btn_build_clicked();
-  void btn_foreach_clicked();
+  void action_build_clear(bool flag);
+  void action_refresh(bool flag);
   void btn_leave_clicked();
   void btn_reverse_clicked();
-  void cb_foreach_change(const QString &str);//btn_leave
+  void cb_foreach_change(const QString &str); // btn_leave
 };
 
 #endif // WIDGET_H

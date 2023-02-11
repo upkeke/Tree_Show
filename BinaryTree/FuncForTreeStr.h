@@ -3,22 +3,22 @@
 #ifndef __FUNCFORTREESTR__
 #define __FUNCFORTREESTR__
 
-#include <BinaryTree.hpp>
+#include <NodeStr.hpp>
 #include <QPointF>
 #include <QString>
 #include <concepts>
 #include <string>
+namespace sbt {
 
 QPointF operator*(const PosStrNode &ps, const QPointF &pt);
 QPointF operator*(const QPointF &pt, const PosStrNode &ps);
 
-
 /**
  * @brief 其满足str_able约束的其他类型的值转换为QString
- * 
- * @tparam T 
- * @param val 
- * @return QString 
+ *
+ * @tparam T
+ * @param val
+ * @return QString
  */
 template <str_able T> QString val_to_qstring(const T &val) {
   if constexpr (std::is_arithmetic_v<T>) {
@@ -40,10 +40,10 @@ template <str_able T> QString val_to_qstring(const T &val) {
 }
 /**
  * @brief 其满足str_able约束的其他类型的值转换为string
- * 
- * @tparam T 
- * @param val 
- * @return std::string 
+ *
+ * @tparam T
+ * @param val
+ * @return std::string
  */
 template <str_able T> std::string val_to_string(const T &val) {
   if constexpr (std::is_arithmetic_v<T>) {
@@ -87,12 +87,12 @@ void foreach_front(NodePtr head, Func func, Args &&...args) {
 }
 /**
  * @brief 中序遍历
- * 
- * @tparam Func 
- * @tparam Args 
- * @param head 
- * @param func 
- * @param args 
+ *
+ * @tparam Func
+ * @tparam Args
+ * @param head
+ * @param func
+ * @param args
  */
 template <class Func, class... Args>
 void foreach_mid(NodePtr head, Func func, Args &&...args) {
@@ -116,12 +116,12 @@ void foreach_mid(NodePtr head, Func func, Args &&...args) {
 }
 /**
  * @brief 后序遍历
- * 
- * @tparam Func 
- * @tparam Args 
- * @param head 
- * @param func 
- * @param args 
+ *
+ * @tparam Func
+ * @tparam Args
+ * @param head
+ * @param func
+ * @param args
  */
 template <class Func, class... Args>
 void foreach_back(NodePtr head, Func func, Args &&...args) {
@@ -150,25 +150,26 @@ void foreach_back(NodePtr head, Func func, Args &&...args) {
 }
 /**
  * @brief 调整节点的横坐标。使用场景坐标
- * 
- * @param head 
+ *
+ * @param head
  * @param scale_row 比例尺
  */
-void update_row(PosStrNode *head, int scale_row);
+void update_row(NodePtr head, int scale_row);
 /**
  * @brief 调整节点的纵坐标。使用场景坐标
- * 
- * @param head 
- * @param scale_col 
+ *
+ * @param head
+ * @param scale_col
  */
-void update_col(PosStrNode *head, int scale_col);
+void update_col(NodePtr head, int scale_col);
 /**
  * @brief 调整横纵坐标
- * 
- * @param head 
- * @param scale_row 
- * @param scale_col 
+ *
+ * @param head
+ * @param scale_row
+ * @param scale_col
  */
-void update_xy(PosStrNode *head, int scale_row = 40, int scale_col = 60);
+void update_xy(NodePtr head, int scale_row = 40, int scale_col = 60);
+} // namespace sbt
 
 #endif

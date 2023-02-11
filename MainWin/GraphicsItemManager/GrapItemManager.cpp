@@ -2,9 +2,8 @@
 #include "GrapLineItem.h"
 #include "GrapMoveItem.h"
 #include "GrapNodeItem.h"
-#include <BinaryTree.hpp>
 #include <QGraphicsScene>
-
+using namespace sbt;
 GrapItemManager::GrapItemManager(QGraphicsScene *scene)
     : grapNodePool(), curNodeindex(0), grapLinePool(), curLineIndex(0),
       scene(scene) {}

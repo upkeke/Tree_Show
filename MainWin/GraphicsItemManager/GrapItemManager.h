@@ -1,10 +1,11 @@
 ﻿#pragma once
 #ifndef __GRAPITEMMANAGER__
 #define __GRAPITEMMANAGER__
-#include <BinaryTree.hpp>
+#include <NodeStr.hpp>
 #include <config.h>
 #include <memory>
 #include <unordered_map>
+#include "Grap_Bin.h"
 using std::unordered_map;
 class GrapNodeItem;
 class GrapLineItem;
@@ -17,7 +18,7 @@ class GrapMoveItem;
 GrapNodeItem也不会负责NodePtr的释放
  *
  */
-class GrapItemManager {
+class GRAP_LIB_EXPORT GrapItemManager {
 public:
   static std::shared_ptr<GrapItemManager> instance(QGraphicsScene *scene);
   /**
@@ -28,7 +29,7 @@ public:
    * @param nodeptr
    * @return GrapNodeItem* 获得的节点图元
    */
-  GrapNodeItem *getGrapNode(NodePtr nodeptr);
+  GrapNodeItem *getGrapNode(sbt::NodePtr nodeptr);
   /**
    * @brief 获得包含nodeptr节点的图元
    有些情况需要通过节点直到包含它的图元指针
@@ -36,7 +37,7 @@ public:
    * @param nodeptr 图元的节点指针
    * @return GrapNodeItem* 包含节点指针的图元
    */
-  GrapNodeItem *whereGrapNode(NodePtr nodeptr);
+  GrapNodeItem *whereGrapNode(sbt::NodePtr nodeptr);
   /**
    * @brief G构造一个直线图元，用于连接2个树节点
    如果还有剩余，设置一些它的2个断点，直接返回
@@ -87,7 +88,7 @@ private:
    GrapNodeItem，这样会产生混乱 只要外部禁止构造GrapNodeItem对象就不会出现
    *
    */
-  unordered_map<NodePtr, GrapNodeItem *> nodeToGrapNode;
+  unordered_map<sbt::NodePtr, GrapNodeItem *> nodeToGrapNode;
   _SPC vector<GrapLineItem *> grapLinePool;
   size_t curLineIndex = 0;
   _SPC vector<GrapMoveItem *> grapMovePool;

@@ -10,6 +10,7 @@
 #include <config.h>
 #include <numeric>
 #include <random>
+
 namespace {
 // 打乱数组
 template <class T> void shuffle_vector(_SPC vector<T> &arr) {
@@ -72,18 +73,16 @@ template <> _SPC vector<char> get_vector<char>(size_t sz) {
     if (c == 'Z') {
       c = 'A';
     }
+    i++;
   }
   shuffle_vector(arr);
   return arr;
 }
-template <> _SPC vector<QPointF> get_vector<QPointF>(size_t sz)
-{
-  auto poss = get_vector_norepeat(100,100,0);
+template <> _SPC vector<QPointF> get_vector<QPointF>(size_t sz) {
+  auto poss = get_vector_norepeat(100, 100, 0);
   return {};
-
 }
-template <> _SPC vector<NodePtr> get_vector<NodePtr>(size_t sz) {
+template <> _SPC vector<sbt::NodePtr> get_vector<sbt::NodePtr>(size_t sz) {
   auto c_arr = get_vector<char>(sz);
-  
   return {};
 }

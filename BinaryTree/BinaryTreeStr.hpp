@@ -4,9 +4,10 @@
 #define __BINARYTREESTR__
 
 #include "FuncForTreeStr.h"
-#include <BinaryTree.hpp>
+#include <NodeStr.hpp>
 #include <QPointF>
 #include <functional>
+namespace sbt {
 
 struct BinaryTreeStr : BinaryTree<PosStrNode> {
   using typename BinaryTree<PosStrNode>::Direction;
@@ -23,7 +24,7 @@ struct BinaryTreeStr : BinaryTree<PosStrNode> {
   int scale_row = 40;
   int scale_col = 60;
   BinaryTreeStr() = default;
-  template <str_able tp> explicit BinaryTreeStr(_baseNode<tp> *_head) {
+  template <node_able NodeTy> explicit BinaryTreeStr(NodeTy *_head) {
     init_tree(_head);
   }
   // 调试用
@@ -53,9 +54,9 @@ struct BinaryTreeStr : BinaryTree<PosStrNode> {
       temp->right = new Node(data[i++]);
       // qe.push(static_cast<NodePtr>(temp->right));
       qe.push(temp->Right());
-      qe.pop();       
+      qe.pop();
     }
-    ::update_xy(head, scale_row, scale_col);
+    sbt::update_xy(head, scale_row, scale_col);
   }
   /**
    * @brief 传入其他类型的Node指针
@@ -65,12 +66,12 @@ struct BinaryTreeStr : BinaryTree<PosStrNode> {
    * @tparam tp  传入指针的val的类型
    * @param nodeptr 传入的根节点
    */
-  template <str_able tp> void init_tree(_baseNode<tp> *nodeptr) {
+  template <node_able NodeTy> void init_tree(NodeTy *nodeptr) {
     // 后序遍历复制
-    std::function<NodePtr(_baseNode<tp> *)> func = [&](_baseNode<tp> *_head)->NodePtr {
+    std::function<NodePtr(NodeTy *)> func = [&](NodeTy *_head) -> NodePtr {
       if (_head == nullptr)
-        //return static_cast<NodePtr>(nullptr) ;
-        return nullptr ;
+        // return static_cast<NodePtr>(nullptr) ;
+        return nullptr;
       NodePtr _left = func(_head->left);
       NodePtr _right = func(_head->right);
 #if HAS_QSTRING
@@ -83,19 +84,19 @@ struct BinaryTreeStr : BinaryTree<PosStrNode> {
     };
     head = func(nodeptr);
     // 修正节点的横纵坐标
-    ::update_xy(head, scale_row, scale_col);
+    sbt::update_xy(head, scale_row, scale_col);
   }
   void set_scale(int x, int y) {
     scale_row = x;
     scale_col = y;
-    ::update_xy(head, scale_row, scale_col);
+    sbt::update_xy(head, scale_row, scale_col);
   }
-  void update_xy() { ::update_xy(head, scale_row, scale_col); }
+  void update_xy() { sbt::update_xy(head, scale_row, scale_col); }
   virtual NodePtr get_head() const override { return head; }
   _SPC vector<NodePtr> foreach_front() const override {
     _SPC vector<NodePtr> re;
 
-    ::foreach_front(
+    sbt::foreach_front(
         head,
         [](NodePtr cur, _SPC vector<NodePtr> &_re) { _re.push_back(cur); }, re);
     return re;
@@ -103,14 +104,14 @@ struct BinaryTreeStr : BinaryTree<PosStrNode> {
   _SPC vector<NodePtr> foreach_mid() const override {
     _SPC vector<NodePtr> re;
 
-    ::foreach_mid(
+    sbt::foreach_mid(
         head,
         [](NodePtr cur, _SPC vector<NodePtr> &_re) { _re.push_back(cur); }, re);
     return re;
   }
   _SPC vector<NodePtr> foreach_back() const override {
     _SPC vector<NodePtr> re;
-    ::foreach_back(
+    sbt::foreach_back(
         head,
         [](NodePtr cur, _SPC vector<NodePtr> &_re) { _re.push_back(cur); }, re);
     return re;
@@ -179,7 +180,7 @@ struct BinaryTreeStr : BinaryTree<PosStrNode> {
       return false;
     bool re = false;
     // 先序遍历
-    ::foreach_front(
+    sbt::foreach_front(
         head,
         [](NodePtr cur, bool &_re, NodePtr _order) {
           if (cur->left == _order || cur->right == _order) {
@@ -208,13 +209,13 @@ struct BinaryTreeStr : BinaryTree<PosStrNode> {
   }
   // 反转左右子树
   void reverse_tree() override {
-    ::foreach_front(head,
-                    [](NodePtr cur) { std::swap(cur->left, cur->right); });
-    ::update_xy(head, scale_row, scale_col);
+    sbt::foreach_front(head,
+                       [](NodePtr cur) { std::swap(cur->left, cur->right); });
+    sbt::update_xy(head, scale_row, scale_col);
   }
   std::unordered_set<NodePtr> get_leaves() const override {
     std::unordered_set<NodePtr> re;
-    ::foreach_front(
+    sbt::foreach_front(
         head,
         [](NodePtr cur, std::unordered_set<NodePtr> &_re) {
           if (cur->left == nullptr && cur->right == nullptr) {
@@ -226,15 +227,21 @@ struct BinaryTreeStr : BinaryTree<PosStrNode> {
   }
   // 销毁树
   void destroy_tree() override {
-    ::foreach_back(head, [](NodePtr cur) { delete cur; });
+    sbt::foreach_back(head, [](NodePtr cur) { delete cur; });
+    head = nullptr;
   }
   bool empty() const override { return head == nullptr; }
   size_t size() const override {
     size_t count = 0;
-    ::foreach_front(
+    sbt::foreach_front(
         head, [](NodePtr cur, size_t &count) { count++; }, count);
     return count;
   }
+  ~BinaryTreeStr()
+  {
+    destroy_tree();
+  }
 };
+} // namespace sbt
 
 #endif

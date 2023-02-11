@@ -3,7 +3,7 @@
 #pragma once
 #ifndef __MYLINEITEM__
 #define __MYLINEITEM__
-
+#include "Grap_Bin.h"
 #include <QGraphicsLineItem>
 class GrapNodeItem;
 
@@ -12,7 +12,7 @@ class GrapNodeItem;
  2个成员变量是是直线2段的树节点
  *
  */
-class GrapLineItem : public QGraphicsLineItem {
+class GRAP_LIB_EXPORT GrapLineItem : public QGraphicsLineItem {
 public:
   GrapLineItem(GrapNodeItem *front, GrapNodeItem *end,
                QGraphicsItem *parent = nullptr);

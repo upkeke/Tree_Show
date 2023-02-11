@@ -6,11 +6,12 @@
 
 #include <QGraphicsItem>
 class GrapLineItem;
-#include <BinaryTree.hpp>
+#include <NodeStr.hpp>
 #include <QPen>
 #include <config.h>
+#include"Grap_Bin.h"
 
-class GrapNodeItem : public QObject, public QGraphicsItem {
+class GRAP_LIB_EXPORT GrapNodeItem : public QObject, public QGraphicsItem {
   Q_OBJECT
   Q_INTERFACES(QGraphicsItem)
   /**
@@ -26,8 +27,9 @@ public:
    *
    * @param node 根据的节点
    */
-  void reSet(NodePtr nodeptr);
+  void reSet(sbt::NodePtr nodeptr);
   void setVal(const _string &num);
+  _string strVal() { return val; }
   /**
    * @brief 发现一个直线和图元相连。把它添加到lineArry
    *
@@ -48,20 +50,29 @@ public:
   void paint(QPainter *painter, const QStyleOptionGraphicsItem *option,
              QWidget *widget) override;
   QRectF boundingRect() const override;
+  QPainterPath shape() const override;
 
   virtual void mouseMoveEvent(QGraphicsSceneMouseEvent *event) override;
+
   /**
    * @brief Set the Back Color
    *
    * @param col
    */
-  void setBackColor(NodeColor col);
+  void setBackColor(sbt::NodeColor col);
   /**
    * @brief 设置图元的实际宽
    * 图片传进来后会进行收缩，这个变量是缩放后图元的宽
    * @param order_h
    */
   void setRadius(int order_h = 30);
+signals:
+/**
+ * @brief 碰到其他图元发射其他图元
+ * 
+ * @param other 
+ */
+  void andOther(QGraphicsItem *other);
 
 private:
   /**
@@ -70,7 +81,7 @@ private:
    * @param nodeptr 传入节点指针
    * @param parent
    */
-  explicit GrapNodeItem(NodePtr nodeptr, QGraphicsItem *parent = nullptr);
+  explicit GrapNodeItem(sbt::NodePtr nodeptr, QGraphicsItem *parent = nullptr);
 
   /**
    * @brief 与节点图元连接的直线图元
@@ -78,7 +89,7 @@ private:
    */
   _SPC vector<GrapLineItem *> lineArry{};
   QPen pen{Qt::black};
-  NodePtr nodeptr = nullptr;
+  sbt::NodePtr nodeptr = nullptr;
   _string val;
   int radius = 15;
 };

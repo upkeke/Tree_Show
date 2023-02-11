@@ -7,7 +7,7 @@
 #include <queue>
 #include <stack>
 
-
+using namespace sbt;
 using std::strong_ordering;
 
 std::ostream &operator<<(std::ostream &out, const strong_ordering &obj) {

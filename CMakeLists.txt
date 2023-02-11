@@ -1,9 +1,10 @@
-﻿cmake_minimum_required(VERSION 3.16)
+﻿cmake_minimum_required(VERSION 3.20)
 
 project(XXX VERSION 1.0.0 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
 set(CMAKE_PREFIX_PATH "C:/Qt/6.4.2/mingw_64") # 设置qt动态库的路径
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
@@ -30,6 +31,7 @@ if(MSVC)
     set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
     set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 endif()
+
 #message("Qt6Widgets_INCLUDE_DIRS >> ${Qt6Widgets_INCLUDE_DIRS}")
 #include_directories(BEFORE ${Qt6Widgets_INCLUDE_DIRS})
 
@@ -37,6 +39,7 @@ endif()
 add_subdirectory(BinaryTree)
 add_subdirectory(MainWin)
 
+add_executable(mainxm main.cpp)
 
 
  
