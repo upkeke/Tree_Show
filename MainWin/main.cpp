@@ -31,7 +31,7 @@ struct Node2 {
   Node2(char val) : val(val) {}
 };
 Node2 *creatNode2() {
-  auto data = get_vector<char>(3);
+  auto data = get_vector<char>(12);
   Node2 *head = new Node2(data[0]);
   _SPC queue<Node2 *> qe;
   qe.push(head);

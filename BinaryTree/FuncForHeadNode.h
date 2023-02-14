@@ -152,24 +152,21 @@ void foreach_back(NodePtr head, Func func, Args &&...args) {
  * @brief 调整节点的横坐标。使用场景坐标
  *
  * @param head
- * @param scale_row 比例尺
  */
-void update_row(NodePtr head, int scale_row);
+void update_row(NodePtr head);
 /**
  * @brief 调整节点的纵坐标。使用场景坐标
  *
  * @param head
- * @param scale_col
  */
-void update_col(NodePtr head, int scale_col);
+void update_col(NodePtr head, const QPointF &offset);
 /**
  * @brief 调整横纵坐标
  *
  * @param head
- * @param scale_row
- * @param scale_col
+ * @param offset
  */
-void update_xy(NodePtr head, int scale_row = 40, int scale_col = 60);
+void update_xy(NodePtr head, const QPointF &offset);
 } // namespace sbt
 
 #endif

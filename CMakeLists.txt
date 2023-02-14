@@ -34,12 +34,13 @@ endif()
 
 #message("Qt6Widgets_INCLUDE_DIRS >> ${Qt6Widgets_INCLUDE_DIRS}")
 #include_directories(BEFORE ${Qt6Widgets_INCLUDE_DIRS})
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/bin)
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/lib)
 
 
 add_subdirectory(BinaryTree)
 add_subdirectory(MainWin)
 
-add_executable(mainxm main.cpp)
 
 
  

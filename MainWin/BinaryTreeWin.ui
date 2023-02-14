@@ -43,10 +43,12 @@
    <addaction name="actionbuild"/>
    <addaction name="actrefresh"/>
    <addaction name="actionadd"/>
+   <addaction name="actionleaf"/>
+   <addaction name="actiondepth"/>
   </widget>
   <action name="actionbuild">
    <property name="checkable">
-    <bool>true</bool>
+    <bool>false</bool>
    </property>
    <property name="checked">
     <bool>false</bool>
@@ -85,6 +87,36 @@
    </property>
    <property name="toolTip">
     <string>添加节点</string>
+   </property>
+  </action>
+  <action name="actionleaf">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="mainRes.qrc">
+     <normaloff>:/k/img/leaves.png</normaloff>:/k/img/leaves.png</iconset>
+   </property>
+   <property name="text">
+    <string>显示叶子节点</string>
+   </property>
+   <property name="toolTip">
+    <string>显示叶子节点</string>
+   </property>
+  </action>
+  <action name="actiondepth">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="mainRes.qrc">
+     <normaloff>:/k/img/xin.png</normaloff>:/k/img/xin.png</iconset>
+   </property>
+   <property name="text">
+    <string>显示深度</string>
+   </property>
+   <property name="toolTip">
+    <string>显示深度</string>
    </property>
   </action>
  </widget>

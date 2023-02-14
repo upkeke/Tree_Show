@@ -6,11 +6,11 @@
 
 #include <QGraphicsItem>
 class GrapLineItem;
+#include "Grap_Bin.h"
 #include <NodeStr.hpp>
 #include <QPen>
 #include <config.h>
-#include"Grap_Bin.h"
-
+class MainWin;
 class GRAP_LIB_EXPORT GrapNodeItem : public QObject, public QGraphicsItem {
   Q_OBJECT
   Q_INTERFACES(QGraphicsItem)
@@ -28,6 +28,7 @@ public:
    * @param node 根据的节点
    */
   void reSet(sbt::NodePtr nodeptr);
+  sbt::NodePtr getNodePtr();
   void setVal(const _string &num);
   _string strVal() { return val; }
   /**
@@ -52,8 +53,8 @@ public:
   QRectF boundingRect() const override;
   QPainterPath shape() const override;
 
-  virtual void mouseMoveEvent(QGraphicsSceneMouseEvent *event) override;
-
+  void mouseMoveEvent(QGraphicsSceneMouseEvent *event) override;
+  void contextMenuEvent(QGraphicsSceneContextMenuEvent *event) override;
   /**
    * @brief Set the Back Color
    *
@@ -66,13 +67,39 @@ public:
    * @param order_h
    */
   void setRadius(int order_h = 30);
+  void setIsNew(bool flag);
+  void SetIsShowDepth(bool flag);
+  ~GrapNodeItem();
 signals:
-/**
- * @brief 碰到其他图元发射其他图元
- * 
- * @param other 
- */
+  /**
+   * @brief 碰到其他图元发射其他图元
+   *
+   * @param other
+   */
   void andOther(QGraphicsItem *other);
+  /**
+   * @brief 更新树的所有节点的场景位置
+   *
+   */
+  void updateTreePos(sbt::NodePtr head, const QPointF &offset);
+  /**
+   * @brief 截断二叉树，当前选中节点作为新的树的根节点
+   *
+   */
+  void truncateCurTree(GrapNodeItem *headItem);
+  /**
+   * @brief 修改节点的值
+   *
+   * @param node
+   */
+  void changeVal(sbt::NodePtr node);
+  /**
+   * @brief 作为主树，场景中可能有很多树，当前这个被作为被遍历的树
+   *
+   * @param node
+   */
+  void beStar(sbt::NodePtr node);
+  void addChildNode(bool isLeft, sbt::NodePtr node);
 
 private:
   /**
@@ -82,15 +109,20 @@ private:
    * @param parent
    */
   explicit GrapNodeItem(sbt::NodePtr nodeptr, QGraphicsItem *parent = nullptr);
-
+  void initMenu();
   /**
-   * @brief 与节点图元连接的直线图元
-   *
+   * @brief 如果是根节点会有更多的action
+   * 
    */
+  void actionOnlyHead();
+
   _SPC vector<GrapLineItem *> lineArry{};
   QPen pen{Qt::black};
   sbt::NodePtr nodeptr = nullptr;
   _string val;
   int radius = 15;
+  bool isNew = false;
+  bool isShowDepth = false;
+  QMenu *menu = nullptr;
 };
 #endif

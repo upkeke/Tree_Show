@@ -5,7 +5,7 @@
 #include <concepts>
 #include <config.h>
 #include <type_traits>
-
+#include<string>
 #if HAS_QSTRING
 // 约束保证T是基本类型，或者能够隐式转换为string，QString的自定义类型
 template <class T>
@@ -17,7 +17,7 @@ template <class T>
 concept str_able =
     std::is_arithmetic_v<T> || std::is_convertible_v<T, std::string>;
 #endif
-template <str_able T> struct _baseNode {
+template <class T> struct _baseNode {
   _baseNode(const T &val, _baseNode *left = nullptr, _baseNode *right = nullptr)
       : val(val), left(left), right(right) {}
   _baseNode(T &&val, _baseNode *left = nullptr, _baseNode *right = nullptr)
@@ -40,9 +40,10 @@ concept node_able =
       { obj.left } -> std::same_as<T *&>;
       { obj.right } -> std::same_as<T *&>;
       requires str_able<decltype(obj.val)>;
-    } || requires {
-           // 这个为了适配前期我前期不合理的设计，全部修改有点麻烦，内部测试
-           requires std::derived_from<T, _baseNode<typename T::tp>>;
-         };
+    } ;
 
 #endif
+/*|| requires {
+           // 这个为了适配前期我前期不合理的设计，全部修改有点麻烦，内部测试
+           requires std::derived_from<T, _baseNode<typename T::tp>>;
+         }*/

@@ -38,7 +38,7 @@ public:
 
 private:
   int radius = 20;
-  QList<QPointF> wu;
+  QVector<QPointF> wu;
 };
 
 #endif

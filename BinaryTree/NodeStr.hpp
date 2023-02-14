@@ -21,43 +21,51 @@
 --------------------------------------------------------------
 */
 #include <QPointF>
+#include<QString>
 namespace sbt {
 // class GrapNodeItem;
 using NodeColor = Qt::GlobalColor;
-struct PosStrNode : _baseNode<_string> {
-  using BaseNode = _baseNode<_string>;
-  using BaseNodePtr = _baseNode<_string> *;
-  using _baseNode<_string>::_baseNode;
-  int row = 0;
-  int col = 0;
-  NodeColor color = NodeColor::yellow;
+struct PosStrNode : _baseNode<QString> {
+  using BaseNode = _baseNode<QString>;
+  using BaseNodePtr = _baseNode<QString> *;
+  using _baseNode<QString>::_baseNode;
+  /**
+   * @brief 拷贝构造移动构造赋值运算都是默认，浅拷贝，
+   不能资源的释放靠tree维护
+   *
+   */
   PosStrNode() = default;
+
   explicit PosStrNode(NodeColor color) : BaseNode() { this->color = color; }
   PosStrNode(int row, int col, NodeColor color)
       : row(row), col(col), color(color) {}
-  PosStrNode(const QPointF &pos, NodeColor color)
-      : row(pos.x()), col(pos.y()), color(color) {}
-  void setPos(int x, int y) {
-    row = x;
-    col = y;
-  }
-  void setPos(const QPointF &pos) {
-    row = pos.x();
-    col = pos.y();
-  }
-  QPointF Pos() const { return QPointF(row, col); }
+  PosStrNode(const QPointF &pos, NodeColor color) : pos(pos), color(color) {}
 
-  void setColor(NodeColor _color) { color = _color; }
-
-  void setPosColor(int row, int col, NodeColor color) {
+  void setPos(const QPointF &pos) { this->pos = pos; }
+  void offsetPos(const QPointF &offset = QPointF{0, 0}) {
+    pos = QPointF(row * scale.x(), col * scale.y()) + offset;
+  }
+  QPointF Pos() const { return pos; }
+  /**
+   * @brief 图元后序可能会移动，移动后的位置，求出偏移量
+   *
+   * @param curPos
+   */
+  QPointF getOffsetByNowPos(const QPointF &curPos) {
+    return curPos - QPointF(row * scale.x(), col * scale.y());
+  }
+  static void setScale(const QPointF &scale) { PosStrNode::scale = scale; }
+  /**
+   * @brief 设置 衡中原始坐标，而不是场景坐标
+   *
+   * @param row 原始坐标 row
+   * @param col 原始坐标 col
+   * @param color 颜色
+   */
+  void setXYColor(int row, int col, NodeColor color) {
     this->row = row;
     this->col = col;
     this->color = color;
-  }
-  void setPosColor(const PosStrNode &other) {
-    row = other.row;
-    col = other.col;
-    color = other.color;
   }
   /**
    * @brief 需要强转一下
@@ -67,6 +75,27 @@ struct PosStrNode : _baseNode<_string> {
    */
   PosStrNode *Left() { return static_cast<PosStrNode *>(left); }
   PosStrNode *Right() { return static_cast<PosStrNode *>(right); }
+  int row = 0;
+  int col = 0;
+  NodeColor color = NodeColor::yellow;
+  bool isHead = false;
+
+private:
+  /**
+   * @brief 节点场景坐标
+   注意pos和row和col的区别
+   pos是根据row和获得，但只会设置一次，之后pos不归row和col管，二者是弱绑定
+   updatePos函数可以再次绑定一下
+   * 对于Node的row和col不能直接使用，需要进行方法
+   */
+  QPointF pos;
+  // 场景中坐标
+  /**
+  * @brief 比例尺
+  row和col向pos转换的比例
+  *
+  */
+  inline static QPointF scale{40, 60}; // 比例尺
 };
 /**
  * @brief 项目内部所有的节点的指针的val都是_string
@@ -75,8 +104,10 @@ struct PosStrNode : _baseNode<_string> {
 using NodePtr = PosStrNode *;
 using Node = PosStrNode;
 using BaseNodePtr = _baseNode<_string> *;
+template <class T>
+concept node_ableA = node_able<T>||std::same_as<T, Node>;
 
-template <node_able NodeT> struct BinaryTree {
+template <node_ableA NodeT> struct BinaryTree {
   enum class Direction {
     left,
     right,

@@ -3,7 +3,7 @@
 #ifndef __BINARYTREESTR__
 #define __BINARYTREESTR__
 
-#include "FuncForTreeStr.h"
+#include "FuncForHeadNode.h"
 #include <NodeStr.hpp>
 #include <QPointF>
 #include <functional>
@@ -16,16 +16,20 @@ struct BinaryTreeStr : BinaryTree<PosStrNode> {
   using BaseNodeStrPtr = BaseNodeStr *;
   using Node = PosStrNode;
   using NodePtr = PosStrNode *;
-  NodePtr head = nullptr;
-  /**
-   * @brief 比例尺
-   * 对于Node的row和col不能直接使用，需要进行方法
-   */
-  int scale_row = 40;
-  int scale_col = 60;
+
   BinaryTreeStr() = default;
   template <node_able NodeTy> explicit BinaryTreeStr(NodeTy *_head) {
     init_tree(_head);
+    if (head != nullptr)
+      head->isHead = true;
+  }
+  explicit BinaryTreeStr(NodePtr _head) {
+    this->head = _head;
+    auto tp = foreach_mid();
+    allNode.insert(tp.begin(), tp.end());
+    sbt::update_xy(head, offset);
+    if (head != nullptr)
+      head->isHead = true;
   }
   // 调试用
   virtual void create_tree() override {
@@ -47,6 +51,7 @@ struct BinaryTreeStr : BinaryTree<PosStrNode> {
         break;
       NodePtr temp = qe.front();
       temp->left = new Node(data[i++]);
+
       // qe.push(static_cast<NodePtr>(temp->left));
       qe.push(temp->Left());
       if (i == data.size())
@@ -56,7 +61,11 @@ struct BinaryTreeStr : BinaryTree<PosStrNode> {
       qe.push(temp->Right());
       qe.pop();
     }
-    sbt::update_xy(head, scale_row, scale_col);
+    auto tp = foreach_mid();
+    allNode.insert(tp.begin(), tp.end());
+    sbt::update_xy(head, offset);
+    if (head != nullptr)
+      head->isHead = true;
   }
   /**
    * @brief 传入其他类型的Node指针
@@ -80,22 +89,20 @@ struct BinaryTreeStr : BinaryTree<PosStrNode> {
       _string str = val_to_string(_head->val);
 #endif
       NodePtr re = new Node(str, _left, _right);
+      this->allNode.insert(re);
       return re;
     };
     head = func(nodeptr);
     // 修正节点的横纵坐标
-    sbt::update_xy(head, scale_row, scale_col);
+    sbt::update_xy(head, offset);
+    if (head != nullptr)
+      head->isHead = true;
   }
-  void set_scale(int x, int y) {
-    scale_row = x;
-    scale_col = y;
-    sbt::update_xy(head, scale_row, scale_col);
-  }
-  void update_xy() { sbt::update_xy(head, scale_row, scale_col); }
+  void update_xy() const { sbt::update_xy(head, offset); }
+  std::unordered_set<NodePtr> getAllNode() const { return allNode; }
   virtual NodePtr get_head() const override { return head; }
   _SPC vector<NodePtr> foreach_front() const override {
     _SPC vector<NodePtr> re;
-
     sbt::foreach_front(
         head,
         [](NodePtr cur, _SPC vector<NodePtr> &_re) { _re.push_back(cur); }, re);
@@ -163,17 +170,38 @@ struct BinaryTreeStr : BinaryTree<PosStrNode> {
       if (base->left == nullptr && dirc == Direction::left) {
         base->left = new Node(_val);
         // base->left->setPosColor(base->col - 1, base->row + 1, base->color);
-        base->Left()->setPosColor(base->col - 1, base->row + 1, base->color);
+        base->Left()->setXYColor(base->col - 1, base->row + 1, base->color);
+        allNode.insert(base->Left());
         return base->Left();
       }
       if (base->right == nullptr && dirc == Direction::right) {
         base->right = new Node(_val);
         // base->right->setPosColor(base->col + 1, base->row + 1, base->color);
-        base->Right()->setPosColor(base->col + 1, base->row + 1, base->color);
+        base->Right()->setXYColor(base->col + 1, base->row + 1, base->color);
+        allNode.insert(base->Right());
         return base->Right();
       }
     }
     return nullptr;
+  }
+  /**
+   * @brief 如果节点的左子树或者右子树为空，可插入
+   *
+   * @param derived
+   * @param base
+   * @param dirc
+   */
+  void insert_node(NodePtr derived, NodePtr base, Direction dirc) {
+    switch (dirc) {
+    case BinaryTree<PosStrNode>::Direction::left:
+      base->left = derived;
+      break;
+    case BinaryTree<PosStrNode>::Direction::right:
+      base->right = derived;
+      break;
+    }
+    derived->color = base->color;
+    derived->col = base->col + 1;
   }
   bool delete_node(NodePtr order) override {
     if (order == nullptr || order->left != nullptr || order->right != nullptr)
@@ -207,11 +235,12 @@ struct BinaryTreeStr : BinaryTree<PosStrNode> {
     };
     return func(head);
   }
+
   // 反转左右子树
   void reverse_tree() override {
     sbt::foreach_front(head,
                        [](NodePtr cur) { std::swap(cur->left, cur->right); });
-    sbt::update_xy(head, scale_row, scale_col);
+    sbt::update_xy(head, offset);
   }
   std::unordered_set<NodePtr> get_leaves() const override {
     std::unordered_set<NodePtr> re;
@@ -237,11 +266,28 @@ struct BinaryTreeStr : BinaryTree<PosStrNode> {
         head, [](NodePtr cur, size_t &count) { count++; }, count);
     return count;
   }
-  ~BinaryTreeStr()
-  {
-    destroy_tree();
-  }
+  ~BinaryTreeStr() { destroy_tree(); }
+  /**
+    * @brief 设置偏移量
+    调用这个函数后要调用updatePos，是所有的节点都调用，
+    *
+    * @param offset
+    */
+  void setOffset(const QPointF &offset) { this->offset = offset; }
+
+private:
+  NodePtr head = nullptr;
+  std::unordered_set<NodePtr> allNode;
+  /**
+  * @brief 偏移量
+  节点在场景中的坐标会和这个偏移量相加，方便二叉树位置的再调整
+  *
+  */
+  QPointF offset{0, 0};
+  // setOffset
 };
+using Tree = BinaryTreeStr;
+using TreePtr = BinaryTreeStr *;
 } // namespace sbt
 
 #endif

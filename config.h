@@ -15,14 +15,14 @@
 #include<container.hpp>
 #endif
 
-#define HAS_QSTRING 0
-#if HAS_QSTRING
-#include<QString>
-using _string = QString;
-#else
-#include<string>
-using std::string;
-using _string = string;
-#endif
+// #define HAS_QSTRING 0
+// #if HAS_QSTRING
+// #include<QString>
+// using _string = QString;
+// #else
+// #include<string>
+// using std::string;
+// using _string = string;
+// #endif
 
 #endif

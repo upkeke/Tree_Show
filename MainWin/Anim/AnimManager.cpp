@@ -143,7 +143,7 @@ void AnimManager::_五角星遍历动画(_SPC vector<sbt::NodePtr> nodeptr_list,
           qreal dis =
               disBtwItem(nodeptr_list[curIndex]->Pos(), value.toPointF());
           if (dis < 20) {
-            nodeptr_list[curIndex]->setColor(sbt::NodeColor::green);
+            nodeptr_list[curIndex]->color = sbt::NodeColor::green;
             // 当五角星靠近图元节点的时候放大节点图元，然后复原
             QPropertyAnimation *tpanm = new QPropertyAnimation(
                 grapPool->whereGrapNode(nodeptr_list[curIndex]), "scale");

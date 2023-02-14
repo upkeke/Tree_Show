@@ -1,6 +1,6 @@
 ﻿
 #include "get_test_data.h"
-#include "FuncForTreeStr.h"
+#include "FuncForHeadNode.h"
 #include <QSqlDatabase>
 #include <QSqlError>
 #include <QSqlQuery>

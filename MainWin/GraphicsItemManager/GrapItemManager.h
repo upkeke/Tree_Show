@@ -1,17 +1,19 @@
 ﻿#pragma once
 #ifndef __GRAPITEMMANAGER__
 #define __GRAPITEMMANAGER__
+#include "Grap_Bin.h"
 #include <NodeStr.hpp>
 #include <config.h>
 #include <memory>
 #include <unordered_map>
-#include "Grap_Bin.h"
+//#include<BinaryTreeStr.hpp>
+
 using std::unordered_map;
 class GrapNodeItem;
 class GrapLineItem;
 class QGraphicsScene;
 class GrapMoveItem;
-
+class QObject;
 /**
  * @brief 这个是一个图元观测器
  不负责GrapLineItem和GrapNodeItem GrapMoveItem的释放
@@ -29,7 +31,13 @@ public:
    * @param nodeptr
    * @return GrapNodeItem* 获得的节点图元
    */
-  GrapNodeItem *getGrapNode(sbt::NodePtr nodeptr);
+  GrapNodeItem *getGrapNode(sbt::NodePtr nodeptr, bool &isNew);
+  /**
+   * @brief  显示或者显示深度
+   *
+   * @param flag true 显示深度，false显示val
+   */
+  void ShowDepthOrVal(bool flag);
   /**
    * @brief 获得包含nodeptr节点的图元
    有些情况需要通过节点直到包含它的图元指针
@@ -38,6 +46,11 @@ public:
    * @return GrapNodeItem* 包含节点指针的图元
    */
   GrapNodeItem *whereGrapNode(sbt::NodePtr nodeptr);
+  /**
+   * @brief 图元根据节点位置归位
+   *
+   */
+  void updateGrapNodePos(sbt::NodePtr head,const QPointF &offset);
   /**
    * @brief G构造一个直线图元，用于连接2个树节点
    如果还有剩余，设置一些它的2个断点，直接返回
@@ -50,23 +63,24 @@ public:
   GrapLineItem *getGrapLine(GrapNodeItem *front, GrapNodeItem *end);
   /**
    * @brief 一个运动图元
+
    遍历每个树节点的时候需要一个图元根据遍历顺序不段的移动
    这个函数并没有用过，可以忽略
-   * 
+   *
    * @param pos 图元生成的位置，在场景中坐标
-   * @return GrapMoveItem* 
+   * @return GrapMoveItem*
    */
   GrapMoveItem *getGrapMove(const QPointF &pos);
   /**
    * @brief 隐藏多余的图元
-   * 
+   *
    */
-  void hideSurplus(); 
+  void hideSurplus();
   /**
    * @brief 隐藏所有的图元
-   * 
+   *
    */
-  void hideAll();    
+  void hideNodes(sbt::NodePtr head);
 
   ~GrapItemManager();
 

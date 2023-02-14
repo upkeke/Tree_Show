@@ -2,7 +2,6 @@
 
 set(Anim_src 
     AnimManager.cpp
-    xxpop.cpp
 )
 
 

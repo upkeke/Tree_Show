@@ -5,9 +5,8 @@ add_subdirectory(container)
 
 find_package(Qt6 REQUIRED Sql Widgets Core)
 
-
-add_library(FuncForTreeStr FuncForTreeStr.cpp)
-target_link_libraries(FuncForTreeStr
+add_library(FuncForHeadNode SHARED FuncForHeadNode.cpp)
+target_link_libraries(FuncForHeadNode
         PUBLIC
         Qt6::Core
 )
@@ -20,8 +19,9 @@ target_link_libraries(test_data
         Qt6::Core
         Qt6::Sql
 )
+
 add_custom_command(TARGET test_data
-        COMMAND copy "..\\..\\data\\somedata.db" "..\\"
+        COMMAND copy "..\\..\\data\\somedata.db" "..\\..\\bin"
 )
 
 add_executable(bin_main main.cpp)

@@ -2,7 +2,9 @@
 #include "GrapLineItem.h"
 #include "GrapMoveItem.h"
 #include "GrapNodeItem.h"
+#include <FuncForHeadNode.h>
 #include <QGraphicsScene>
+
 using namespace sbt;
 GrapItemManager::GrapItemManager(QGraphicsScene *scene)
     : grapNodePool(), curNodeindex(0), grapLinePool(), curLineIndex(0),
@@ -15,16 +17,18 @@ GrapItemManager::instance(QGraphicsScene *scene) {
   }
   return ItemManager;
 }
-GrapNodeItem *GrapItemManager::getGrapNode(NodePtr nodeptr) {
+GrapNodeItem *GrapItemManager::getGrapNode(NodePtr nodeptr, bool &isNew) {
   auto temp = grapNodePool.size();
   GrapNodeItem *item = nullptr;
   if (curNodeindex == temp) {
     item = new GrapNodeItem(nodeptr);
     scene->addItem(item);
     grapNodePool.push_back(item);
+    isNew = true;
   } else {
     item = grapNodePool[curNodeindex];
     item->reSet(nodeptr);
+    isNew = false;
   }
   nodeToGrapNode[nodeptr] = item;
   curNodeindex++;
@@ -32,11 +36,27 @@ GrapNodeItem *GrapItemManager::getGrapNode(NodePtr nodeptr) {
   item->clearLines();
   return item;
 }
+void GrapItemManager::ShowDepthOrVal(bool flag) {
+  for (int i = 0; i < curNodeindex; ++i) {
+    grapNodePool[i]->SetIsShowDepth(flag);
+  }
+}
 GrapNodeItem *GrapItemManager::whereGrapNode(NodePtr nodeptr) {
   if (nodeToGrapNode.contains(nodeptr)) {
     return nodeToGrapNode[nodeptr];
   }
   return nullptr;
+}
+void GrapItemManager::updateGrapNodePos(sbt::NodePtr head,
+                                        const QPointF &offset) {
+  sbt::foreach_front(
+      head,
+      [](NodePtr cur, const QPointF &_offset,
+         unordered_map<sbt::NodePtr, GrapNodeItem *> &_nodeToGrapNode) {
+        cur->offsetPos(_offset);
+        _nodeToGrapNode[cur]->setPos(cur->Pos());
+      },
+      offset, nodeToGrapNode);
 }
 GrapLineItem *GrapItemManager::getGrapLine(GrapNodeItem *front,
                                            GrapNodeItem *end) {
@@ -52,6 +72,9 @@ GrapLineItem *GrapItemManager::getGrapLine(GrapNodeItem *front,
   }
   curLineIndex++;
   item->show();
+  // 由于直线与2个图元连接，把直线添加到2个图元中
+  front->addLine(item);
+  end->addLine(item);
   return item;
 }
 
@@ -63,18 +86,27 @@ void GrapItemManager::hideSurplus() {
   for (size_t i = curLineIndex; i < grapLinePool.size(); ++i) {
     grapLinePool[i]->hide();
   }
-  curNodeindex = 0;
-  curLineIndex = 0;
+  // curNodeindex = 0;
+  // curLineIndex = 0;
   scene->update();
 }
 
-void GrapItemManager::hideAll() {
-  for (auto i : grapNodePool) {
-    i->hide();
-  }
-  for (auto i : grapLinePool) {
-    i->hide();
-  }
+void GrapItemManager::hideNodes(NodePtr head) {
+  sbt::foreach_front(
+      head,
+      [](NodePtr cur,
+         unordered_map<sbt::NodePtr, GrapNodeItem *> &_nodeToGrapNode) {
+        _nodeToGrapNode[cur]->hide();
+        _nodeToGrapNode[cur]->reMoveLines();
+        _nodeToGrapNode.erase(cur);
+      },
+      nodeToGrapNode);
+  // for (auto i : nodes) {
+  //   nodeToGrapNode[i]->hide();
+  //   nodeToGrapNode[i]->reMoveLines();
+  //   nodeToGrapNode.erase(i);
+  // }
+
   scene->update();
 }
 

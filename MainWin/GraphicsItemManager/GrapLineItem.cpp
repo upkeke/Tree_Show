@@ -10,8 +10,7 @@ GrapLineItem::GrapLineItem(GrapNodeItem *front, GrapNodeItem *end,
     qDebug() << "itemAt没找到图元1";
     return;
   }
-
-  setZValue(this->front->zValue() - 1);     // 让线的图层 在front的下面
+  setZValue(-1);     // 让线的图层 在front的下面
   setFlag(QGraphicsItem::ItemIsSelectable); // 线段可选择的
   QPen pen(Qt::red);
   pen.setWidth(3);

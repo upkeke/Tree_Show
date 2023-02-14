@@ -3,7 +3,8 @@
 #include <QPainter>
 #include <QMenu>
 #include<QGraphicsSceneContextMenuEvent>
-QList<QPointF> getPoints(qreal r) {
+#include <QVector>
+QVector<QPointF> getPoints(qreal r) {
   qreal rprime = r * sin(18 * M_PI / 180) / sin(126 * M_PI / 180);
   QPointF A{r * cos(18 * M_PI / 180), r * sin(18 * M_PI / 180)};
   QPointF B{r * cos(90 * M_PI / 180), r * sin(90 * M_PI / 180)};
@@ -15,7 +16,7 @@ QList<QPointF> getPoints(qreal r) {
   QPointF H{rprime * cos(198 * M_PI / 180), rprime * sin(198 * M_PI / 180)};
   QPointF I{rprime * cos(270 * M_PI / 180), rprime * sin(272 * M_PI / 180)};
   QPointF J{rprime * cos(342 * M_PI / 180), rprime * sin(342 * M_PI / 180)};
-  QList<QPointF> points{B, F, A, J, E, I, D, H, C, G};
+  QVector<QPointF> points{B, F, A, J, E, I, D, H, C, G};
   return points;
 }
 _SPC vector<QPointF> getPentagonPoints(qreal radius) {
@@ -29,7 +30,7 @@ _SPC vector<QPointF> getPentagonPoints(qreal radius) {
 GrapMoveItem::GrapMoveItem(QPointF mPos, QGraphicsItem *parent)
     : QGraphicsItem(parent), wu(getPoints(radius)) {
   setPos(mPos);
-  setZValue(3);
+  setZValue(1);
 }
 void GrapMoveItem::paint(QPainter *painter,
                          const QStyleOptionGraphicsItem *option,

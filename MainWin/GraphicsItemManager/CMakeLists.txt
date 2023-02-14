@@ -15,6 +15,7 @@ target_link_libraries(${PROJECT_NAME}
     PUBLIC
     Qt6::Widgets
     Qt6::Core
+    FuncForHeadNode
 )
 target_include_directories(${PROJECT_NAME}
     PUBLIC

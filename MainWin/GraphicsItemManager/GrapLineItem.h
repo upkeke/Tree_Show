@@ -5,6 +5,8 @@
 #define __MYLINEITEM__
 #include "Grap_Bin.h"
 #include <QGraphicsLineItem>
+#include <array>
+
 class GrapNodeItem;
 
 /**
@@ -17,6 +19,7 @@ public:
   GrapLineItem(GrapNodeItem *front, GrapNodeItem *end,
                QGraphicsItem *parent = nullptr);
   void setTwo(GrapNodeItem *front, GrapNodeItem *end);
+  std::array<GrapNodeItem *, 2> getFrontEnd() { return {front, end}; }
 
 private:
   GrapNodeItem *front;

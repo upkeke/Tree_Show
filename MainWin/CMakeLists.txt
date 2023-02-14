@@ -18,7 +18,7 @@ target_link_libraries(${PROJECT_NAME}
     PUBLIC
     Qt6::Widgets
     Qt6::Core
-    FuncForTreeStr
+    FuncForHeadNode
     GrapItemManager
     test_data
     GrapUiManager
@@ -31,13 +31,15 @@ target_include_directories(${PROJECT_NAME}
 )
 
 
-add_executable(testWin main2.cpp widget.cpp)
+# add_executable(testWin main2.cpp widget.cpp)
 
-target_link_libraries(testWin
-    PUBLIC
-    Qt6::Widgets
-    Qt6::Core
-    test_data
-    GrapUiManager
-    AnimManager
-)
+# target_link_libraries(testWin
+#     PUBLIC
+#     Qt6::Widgets
+#     Qt6::Core
+#     test_data
+#     GrapUiManager
+#     AnimManager
+# )
+
+add_executable(maxxx3 main3.cpp)

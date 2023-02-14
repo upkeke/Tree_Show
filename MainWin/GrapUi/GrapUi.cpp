@@ -47,7 +47,7 @@ QString OrderQStr(const EechOrder &order) {
 //   font.setPointSize(50);
 // }
 UiForeachBtn::UiForeachBtn(EechOrder order) {
-
+  setZValue(2);
   pix.load(":m/res/img/遍历空-明.png");
   pix = pix.scaledToHeight(25);
   writeArea = QRectF(QPointF(0, 5), pix.size());
@@ -90,6 +90,7 @@ void UiForeachBtn::hide_() {
 --------------------------------------------------------------
 */
 UiForeachRootBtn::UiForeachRootBtn() {
+  setZValue(2);
   // 下拉列表的根btn
   setFlag(QGraphicsItem::ItemIsMovable);
   setFlag(QGraphicsItem::ItemIsSelectable);

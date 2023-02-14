@@ -7,4 +7,9 @@ BinaryTree/弃用
 *.png
 *.psd
 *.jpg
+lib
+bin
+data
+
+
 //.gitignore
