@@ -4,18 +4,14 @@
 #define __BINARYTREESTR__
 
 #include "FuncForHeadNode.h"
-#include <NodeStr.hpp>
+#include "QStrNode.hpp"
 #include <QPointF>
 #include <functional>
 namespace sbt {
-
+// enum class EechOrder { 先序, 中序, 后序, 层级, 选择 };
 struct BinaryTreeStr : BinaryTree<PosStrNode> {
   using typename BinaryTree<PosStrNode>::Direction;
   using typename BinaryTree<PosStrNode>::val_type;
-  using BaseNodeStr = _baseNode<_string>;
-  using BaseNodeStrPtr = BaseNodeStr *;
-  using Node = PosStrNode;
-  using NodePtr = PosStrNode *;
 
   BinaryTreeStr() = default;
   template <node_able NodeTy> explicit BinaryTreeStr(NodeTy *_head) {
@@ -34,13 +30,9 @@ struct BinaryTreeStr : BinaryTree<PosStrNode> {
   // 调试用
   virtual void create_tree() override {
     // vector<int> data = get_vector_norepeat(10);
-    _SPC vector<_string> data(7);
+    _SPC vector<QString> data(7);
     for (int i = 0; i < 7; ++i) {
-#if HAS_QSTRING
-      data[i] = _string::number(i);
-#else
-      data[i] = std::to_string(i);
-#endif
+      data[i] = QString::number(i);
     }
     head = new Node(data[0]);
     _SPC queue<NodePtr> qe;
@@ -51,14 +43,11 @@ struct BinaryTreeStr : BinaryTree<PosStrNode> {
         break;
       NodePtr temp = qe.front();
       temp->left = new Node(data[i++]);
-
-      // qe.push(static_cast<NodePtr>(temp->left));
-      qe.push(temp->Left());
+      qe.push(temp->left);
       if (i == data.size())
         break;
       temp->right = new Node(data[i++]);
-      // qe.push(static_cast<NodePtr>(temp->right));
-      qe.push(temp->Right());
+      qe.push(temp->right);
       qe.pop();
     }
     auto tp = foreach_mid();
@@ -70,7 +59,7 @@ struct BinaryTreeStr : BinaryTree<PosStrNode> {
   /**
    * @brief 传入其他类型的Node指针
    *
-   复制传入的二叉树头节点，并转为Node<_string>*类型，
+   复制传入的二叉树头节点，并转为Node<QString>*类型，
    同时根据scale放大节点的row和col
    * @tparam tp  传入指针的val的类型
    * @param nodeptr 传入的根节点
@@ -83,11 +72,7 @@ struct BinaryTreeStr : BinaryTree<PosStrNode> {
         return nullptr;
       NodePtr _left = func(_head->left);
       NodePtr _right = func(_head->right);
-#if HAS_QSTRING
-      _string str = val_to_qstring(_head->val);
-#else
-      _string str = val_to_string(_head->val);
-#endif
+      QString str = val_to_qstring(_head->val);
       NodePtr re = new Node(str, _left, _right);
       this->allNode.insert(re);
       return re;
@@ -134,10 +119,10 @@ struct BinaryTreeStr : BinaryTree<PosStrNode> {
       re.push_back(temp);
       if (temp->left != nullptr)
         // qe.push(temp->left);
-        qe.push(temp->Left());
+        qe.push(temp->left);
       if (temp->right != nullptr)
         // qe.push(temp->right);
-        qe.push(temp->Right());
+        qe.push(temp->right);
       qe.pop();
     }
     return re;
@@ -170,28 +155,31 @@ struct BinaryTreeStr : BinaryTree<PosStrNode> {
       if (base->left == nullptr && dirc == Direction::left) {
         base->left = new Node(_val);
         // base->left->setPosColor(base->col - 1, base->row + 1, base->color);
-        base->Left()->setXYColor(base->col - 1, base->row + 1, base->color);
-        allNode.insert(base->Left());
-        return base->Left();
+        base->left->setXYColor(base->col - 1, base->row + 1, base->color);
+        allNode.insert(base->left);
+        return base->left;
       }
       if (base->right == nullptr && dirc == Direction::right) {
         base->right = new Node(_val);
         // base->right->setPosColor(base->col + 1, base->row + 1, base->color);
-        base->Right()->setXYColor(base->col + 1, base->row + 1, base->color);
-        allNode.insert(base->Right());
-        return base->Right();
+        base->right->setXYColor(base->col + 1, base->row + 1, base->color);
+        allNode.insert(base->right);
+        return base->right;
       }
     }
     return nullptr;
   }
   /**
    * @brief 如果节点的左子树或者右子树为空，可插入
+   本项目专属
+   当调用这个函数的时候base不可能为空，derived也不能为空
+   因为二者是经过碰撞检测 呈现的2个节点，是存在的
    *
    * @param derived
    * @param base
    * @param dirc
-   */
-  void insert_node(NodePtr derived, NodePtr base, Direction dirc) {
+   */ 
+  static void insert_node(NodePtr derived, NodePtr base, Direction dirc) {
     switch (dirc) {
     case BinaryTree<PosStrNode>::Direction::left:
       base->left = derived;
@@ -202,6 +190,7 @@ struct BinaryTreeStr : BinaryTree<PosStrNode> {
     }
     derived->color = base->color;
     derived->col = base->col + 1;
+    //无法修正row
   }
   bool delete_node(NodePtr order) override {
     if (order == nullptr || order->left != nullptr || order->right != nullptr)
@@ -229,8 +218,8 @@ struct BinaryTreeStr : BinaryTree<PosStrNode> {
     std::function<size_t(NodePtr)> func = [&](NodePtr _head) -> size_t {
       if (_head == nullptr)
         return 0;
-      size_t left = func(_head->Left());
-      size_t right = func(_head->Right());
+      size_t left = func(_head->left);
+      size_t right = func(_head->right);
       return std::max(left, right) + 1;
     };
     return func(head);

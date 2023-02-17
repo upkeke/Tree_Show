@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>529</width>
+    <width>570</width>
     <height>600</height>
    </rect>
   </property>
@@ -25,7 +25,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>529</width>
+     <width>570</width>
      <height>22</height>
     </rect>
    </property>
@@ -54,7 +54,7 @@
     <bool>false</bool>
    </property>
    <property name="icon">
-    <iconset resource="mainRes.qrc">
+    <iconset>
      <normaloff>:/k/img/build.png</normaloff>
      <normalon>:/k/img/clearNode.png</normalon>:/k/img/build.png</iconset>
    </property>
@@ -67,7 +67,7 @@
   </action>
   <action name="actrefresh">
    <property name="icon">
-    <iconset resource="mainRes.qrc">
+    <iconset>
      <normaloff>:/k/img/refresh.png</normaloff>:/k/img/refresh.png</iconset>
    </property>
    <property name="text">
@@ -79,7 +79,7 @@
   </action>
   <action name="actionadd">
    <property name="icon">
-    <iconset resource="mainRes.qrc">
+    <iconset>
      <normaloff>:/k/img/add.png</normaloff>:/k/img/add.png</iconset>
    </property>
    <property name="text">
@@ -94,7 +94,7 @@
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset resource="mainRes.qrc">
+    <iconset>
      <normaloff>:/k/img/leaves.png</normaloff>:/k/img/leaves.png</iconset>
    </property>
    <property name="text">
@@ -109,7 +109,7 @@
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset resource="mainRes.qrc">
+    <iconset>
      <normaloff>:/k/img/xin.png</normaloff>:/k/img/xin.png</iconset>
    </property>
    <property name="text">

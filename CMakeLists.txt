@@ -7,9 +7,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(CMAKE_PREFIX_PATH "C:/Qt/6.4.2/mingw_64") # 设置qt动态库的路径
 set(CMAKE_AUTOMOC ON)
-set(CMAKE_AUTORCC ON)
-set(CMAKE_AUTOUIC ON)
-
+# set(CMAKE_AUTORCC ON)
+# set(CMAKE_AUTOUIC ON)
 
 # option(WRITING "内部使用" OFF)
 # if(WRITING)
@@ -19,7 +18,7 @@ set(CMAKE_AUTOUIC ON)
 # endif()
 
 include_directories(
-    ./
+    ${CMAKE_CURRENT_LIST_DIR}
     ${CMAKE_CURRENT_LIST_DIR}/BinaryTree
     ${CMAKE_CURRENT_LIST_DIR}/BinaryTree/container
 )

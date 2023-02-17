@@ -14,7 +14,7 @@ QT_END_NAMESPACE
 #include <AnimManager.h>
 #include <BinaryTreeStr.hpp>
 #include <GrapUiManager.h>
-#include <NodeTemp.hpp>
+#include <QStrNode.hpp>
 
 class QGraphicsScene;
 class QPointF;
@@ -25,6 +25,7 @@ class QGraphicsItem;
 class GrapMoveItem;
 class QParallelAnimationGroup;
 class QPropertyAnimation;
+class ThScene;
 enum class EechOrder;
 class MainWin : public QMainWindow {
   Q_OBJECT
@@ -36,6 +37,7 @@ public:
     } else {
       curtree->init_tree(head);
     }
+    curtree->get_head()->color = sbt::NodeColor::darkMagenta;
     // cur_nodeptr_list = curtree->foreach_front();
   }
   void test1();
@@ -43,8 +45,11 @@ public:
 
 private:
   void print_tree(sbt::NodePtr head);
+  /// 节点图元和this建立连接
+  void NodeItemConnect(GrapNodeItem *headItem);
   // 如果图元是头节点，会和主窗口有额外的连接
-  void headItemConnect(GrapNodeItem *headItem);
+  void headNodeItemConnect(GrapNodeItem *headItem);
+  void headNodeItemDisConnect(GrapNodeItem *headItem);
   void init_pool();
 
   _SPC vector<sbt::NodePtr> getListByOrder(EechOrder order);
@@ -52,9 +57,10 @@ private:
 
   //_SPC vector<sbt::NodePtr> cur_nodeptr_list;
   sbt::BinaryTreeStr *curtree = nullptr;
-  std::unordered_set<sbt::BinaryTreeStr *> trees{};
+  // 每颗树的所有节点图元都保存在一个中
+  std::unordered_map<sbt::BinaryTreeStr *, QGraphicsItemGroup *> trees{};
 
-  QGraphicsScene *scene = nullptr;
+  ThScene *scene = nullptr;
   std::shared_ptr<GrapItemManager> grapPool = nullptr;
   std::shared_ptr<AnimManager> animPool = nullptr;
   std::shared_ptr<GrapUiManager> uiPool = nullptr;

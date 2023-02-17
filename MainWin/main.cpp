@@ -13,7 +13,7 @@ Node1 *creatNode1() {
   while (!qe.empty()) {
     if (i == data.size())
       break;
-    _baseNode<char> * temp = qe.front();
+    _baseNode<char> *temp = qe.front();
     temp->left = new Node1(data[i++]);
     qe.push(temp->left);
     if (i == data.size())
@@ -26,8 +26,8 @@ Node1 *creatNode1() {
 }
 struct Node2 {
   char val;
-  Node2 *left =nullptr;
-  Node2 *right =nullptr;
+  Node2 *left = nullptr;
+  Node2 *right = nullptr;
   Node2(char val) : val(val) {}
 };
 Node2 *creatNode2() {
@@ -50,11 +50,22 @@ Node2 *creatNode2() {
   }
   return head;
 }
+#include <QResource>
+void loadRes() {
+  QStringList reslist;
+  reslist << "res.rcc";
+  for (auto &res : reslist) {
+    bool f = QResource::registerResource(res);
+    if (f) {
+      qDebug() << res << "加载资源成功";
+    } else
+      qDebug() << res << "加载资源失败";
+  }
+}
 int main(int argc, char *argv[]) {
+  loadRes();
   QApplication a(argc, argv);
-  //_baseNode<int > nd (10);
   MainWin w;
-  //传入树节点的根节点。如果不传入会生成默认的二叉树
   w.set_node_head(creatNode2());
   w.show();
   return a.exec();

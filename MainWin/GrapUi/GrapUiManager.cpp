@@ -1,9 +1,10 @@
 ﻿#include "GrapUiManager.h"
 #include <QGraphicsScene>
-
+#include <QResource>
 GrapUiManager::GrapUiManager(QGraphicsScene *scene) {
+  
   _rootBtn = new UiForeachRootBtn();
-  _rootBtn->setPos(-300,0);
+  _rootBtn->setPos(-300, 0);
   childBtnList[0] = new UiForeachBtn(EechOrder::先序);
   childBtnList[1] = new UiForeachBtn(EechOrder::中序);
   childBtnList[2] = new UiForeachBtn(EechOrder::后序);

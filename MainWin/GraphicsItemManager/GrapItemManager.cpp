@@ -2,6 +2,7 @@
 #include "GrapLineItem.h"
 #include "GrapMoveItem.h"
 #include "GrapNodeItem.h"
+#include <BinaryTreeStr.hpp>
 #include <FuncForHeadNode.h>
 #include <QGraphicsScene>
 
@@ -17,7 +18,8 @@ GrapItemManager::instance(QGraphicsScene *scene) {
   }
   return ItemManager;
 }
-GrapNodeItem *GrapItemManager::getGrapNode(NodePtr nodeptr, bool &isNew) {
+GrapNodeItem *GrapItemManager::getGrapNode(NodePtr nodeptr, bool &isNew,
+                                           QGraphicsItemGroup *grp) {
   auto temp = grapNodePool.size();
   GrapNodeItem *item = nullptr;
   if (curNodeindex == temp) {
@@ -47,16 +49,42 @@ GrapNodeItem *GrapItemManager::whereGrapNode(NodePtr nodeptr) {
   }
   return nullptr;
 }
+std::pair<sbt::BinaryTreeStr *, QGraphicsItemGroup *>
+GrapItemManager::treeWithItemGroup(sbt::BinaryTreeStr *tree,
+                                   QGraphicsItemGroup *grp) {
+  sbt::foreach_front(
+      tree->get_head(),
+      [](NodePtr cur, unordered_map<sbt::NodePtr, GrapNodeItem *> &mp,
+         QGraphicsItemGroup *gp) {
+        if (mp.contains(cur)) {
+          gp->addToGroup(mp[cur]);
+        }
+      },
+      this->nodeToGrapNode, grp);
+  return {};
+}
+/**
+ * @brief
+ 由于可能添加了子节点，添加子节点只能顺带修正col，不能修正row
+ 因此这儿需要修正row，同时添加偏移量
+ *
+ * @param head
+ * @param offset
+ */
 void GrapItemManager::updateGrapNodePos(sbt::NodePtr head,
                                         const QPointF &offset) {
-  sbt::foreach_front(
+
+  int row = 0;
+  sbt::foreach_mid(
       head,
       [](NodePtr cur, const QPointF &_offset,
-         unordered_map<sbt::NodePtr, GrapNodeItem *> &_nodeToGrapNode) {
-        cur->offsetPos(_offset);
+         unordered_map<sbt::NodePtr, GrapNodeItem *> &_nodeToGrapNode,
+         int &_row) {
+        cur->row = _row++;
+        cur->toScenePos(_offset);
         _nodeToGrapNode[cur]->setPos(cur->Pos());
       },
-      offset, nodeToGrapNode);
+      offset, nodeToGrapNode, row);
 }
 GrapLineItem *GrapItemManager::getGrapLine(GrapNodeItem *front,
                                            GrapNodeItem *end) {
@@ -77,7 +105,12 @@ GrapLineItem *GrapItemManager::getGrapLine(GrapNodeItem *front,
   end->addLine(item);
   return item;
 }
-
+GrapLineItem *GrapItemManager::getGrapLine(GrapNodeItem *front,
+                                           GrapNodeItem *end, bool isleft) {
+  GrapLineItem *re = getGrapLine(front, end);
+  re->setIsLeftLine(isleft);
+  return re;
+}
 void GrapItemManager::hideSurplus() {
   for (size_t i = curNodeindex; i < grapNodePool.size(); ++i) {
     grapNodePool[i]->hide();
@@ -86,8 +119,6 @@ void GrapItemManager::hideSurplus() {
   for (size_t i = curLineIndex; i < grapLinePool.size(); ++i) {
     grapLinePool[i]->hide();
   }
-  // curNodeindex = 0;
-  // curLineIndex = 0;
   scene->update();
 }
 
@@ -101,12 +132,6 @@ void GrapItemManager::hideNodes(NodePtr head) {
         _nodeToGrapNode.erase(cur);
       },
       nodeToGrapNode);
-  // for (auto i : nodes) {
-  //   nodeToGrapNode[i]->hide();
-  //   nodeToGrapNode[i]->reMoveLines();
-  //   nodeToGrapNode.erase(i);
-  // }
-
   scene->update();
 }
 

@@ -1,0 +1,24 @@
+<RCC>
+  <qresource prefix="mainwin">
+    <file>img/setting.png</file>
+    <file>img/add.png</file>
+    <file>img/build.png</file>
+    <file>img/clearNode.png</file>
+    <file>img/depth.png</file>
+    <file>img/height.png</file>
+    <file>img/leaves.png</file>
+    <file>img/leaves1.png</file>
+    <file>img/lef.png</file>
+    <file>img/refresh.png</file>
+    <file>img/xin.png</file>
+    <file>img/白云.png</file>
+    <file>img/树1.jpg</file>
+  </qresource>
+  <qresource prefix="GrapUi">
+    <file>img/遍历空-暗.png</file>
+    <file>img/遍历空-明.png</file>
+    <file>img/遍历完整加暗.png</file>
+    <file>img/遍历完整加明.png</file>
+    <file>font/XiaoKeNa.ttf</file>
+  </qresource>
+</RCC>

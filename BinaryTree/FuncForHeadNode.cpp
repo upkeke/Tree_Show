@@ -1,6 +1,6 @@
 ﻿
 #include "FuncForHeadNode.h"
-#include "NodeStr.hpp"
+
 namespace sbt {
 
 QPointF operator*(const PosStrNode &ps, const QPointF &pt) {
@@ -12,6 +12,17 @@ void update_row(NodePtr head) {
   int row = 0;
   sbt::foreach_mid(
       head, [](NodePtr cur, int &_row) { cur->row = _row++; }, row);
+}
+//_修正节点横坐标
+void update_row(NodePtr head, const QPointF &offset) {
+  int row = 0;
+  sbt::foreach_mid(
+      head,
+      [](NodePtr cur, int &_row, const QPointF &_offset) {
+        cur->row = _row++;
+        cur->toScenePos(_offset);
+      },
+      row, offset);
 }
 //_修正节点纵坐标
 void update_col(NodePtr head, const QPointF &offset) {
@@ -26,12 +37,12 @@ void update_col(NodePtr head, const QPointF &offset) {
     qe.pop();
     if (node != nullptr) {
       node->col = index;
-      node->offsetPos(offset);
+      node->toScenePos(offset);
       // cout << node->val << " ";
       if (node->left)
-        qe.push(node->Left());
+        qe.push(node->left);
       if (node->right)
-        qe.push(node->Right());
+        qe.push(node->right);
     } else if (!qe.empty()) {
       qe.push(nullptr);
       ++index;
@@ -45,6 +56,6 @@ void update_xy(NodePtr head, const QPointF &offset) {
     return;
   update_row(head);
   // 这一步不仅要更新col，还要更新节点在场景的坐标，也就是成员变量pos
-  update_col(head,offset);
+  update_col(head, offset);
 }
 } // namespace sbt

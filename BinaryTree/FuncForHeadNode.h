@@ -3,7 +3,7 @@
 #ifndef __FUNCFORTREESTR__
 #define __FUNCFORTREESTR__
 
-#include <NodeStr.hpp>
+#include <QStrNode.hpp>
 #include <QPointF>
 #include <QString>
 #include <concepts>
@@ -75,13 +75,13 @@ void foreach_front(NodePtr head, Func func, Args &&...args) {
       func(temp, std::forward<Args>(args)...);
       sk.push(temp);
       // temp = temp->left;
-      temp = temp->Left();
+      temp = temp->left;
     }
     if (!sk.empty()) {
       temp = sk.top();
       sk.pop(); // 去掉中间节点
       // temp = temp->right;
-      temp = temp->Right();
+      temp = temp->right;
     }
   }
 }
@@ -102,7 +102,7 @@ void foreach_mid(NodePtr head, Func func, Args &&...args) {
     while (temp != nullptr) {
       sk.push(temp);
       // temp = temp->left;
-      temp = temp->Left();
+      temp = temp->left;
     }
     if (!sk.empty()) {
       temp = sk.top();
@@ -110,7 +110,7 @@ void foreach_mid(NodePtr head, Func func, Args &&...args) {
       func(temp, std::forward<Args>(args)...);
       sk.pop(); // 去掉中间节点
       // temp = temp->right;
-      temp = temp->Right();
+      temp = temp->right;
     }
   }
 }
@@ -132,13 +132,13 @@ void foreach_back(NodePtr head, Func func, Args &&...args) {
     while (temp != nullptr) {
       sk.push(temp);
       // temp = temp->left;
-      temp = temp->Left();
+      temp = temp->left;
     }
     temp = sk.top();
     if (temp->right != nullptr) {
       if (temp->right != last) {
         // temp = temp->right;
-        temp = temp->Right();
+        temp = temp->right;
         continue;
       }
     }

@@ -31,8 +31,6 @@ class GRAPUI_LIB_EXPORT UiForeachBtn : public QObject, public QGraphicsItem {
 public:
   // UiForeachBtn(QGraphicsItem *parent = nullptr);
   UiForeachBtn(EechOrder order);
-  //_ZN12UiForeachBtnC1EP13QGraphicsItem
-  //__imp__ZN12UiForeachBtnC1E9EachOrderP13QGraphicsItem
   void paint(QPainter *painter, const QStyleOptionGraphicsItem *option,
              QWidget *widget) override;
   QRectF boundingRect() const override;

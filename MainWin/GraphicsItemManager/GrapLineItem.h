@@ -19,11 +19,14 @@ public:
   GrapLineItem(GrapNodeItem *front, GrapNodeItem *end,
                QGraphicsItem *parent = nullptr);
   void setTwo(GrapNodeItem *front, GrapNodeItem *end);
+  bool isLeftLine();
+  void setIsLeftLine(bool isleft);
   std::array<GrapNodeItem *, 2> getFrontEnd() { return {front, end}; }
 
 private:
   GrapNodeItem *front;
   GrapNodeItem *end;
+  bool isleft = true;
 
   void paint(QPainter *painter, const QStyleOptionGraphicsItem *option,
              QWidget *widget = nullptr) override;

@@ -48,11 +48,11 @@ QString OrderQStr(const EechOrder &order) {
 // }
 UiForeachBtn::UiForeachBtn(EechOrder order) {
   setZValue(2);
-  pix.load(":m/res/img/遍历空-明.png");
+  pix.load(":/GrapUi/img/遍历空-明.png");
   pix = pix.scaledToHeight(25);
   writeArea = QRectF(QPointF(0, 5), pix.size());
   this->order = order;
-  int fontId = QFontDatabase::addApplicationFont(":/p/res/font/XiaoKeNa.ttf");
+  int fontId = QFontDatabase::addApplicationFont(":/GrapUi/font/XiaoKeNa.ttf");
   QString fontFamily = QFontDatabase::applicationFontFamilies(fontId).at(0);
   font.setFamily(fontFamily);
   font.setPointSize(10);
@@ -95,11 +95,11 @@ UiForeachRootBtn::UiForeachRootBtn() {
   setFlag(QGraphicsItem::ItemIsMovable);
   setFlag(QGraphicsItem::ItemIsSelectable);
   // 遍历完整加明
-  pix.load(":m/res/img/遍历完整加暗.png");
+  pix.load(":/GrapUi/img/遍历完整加暗.png");
   pix = pix.scaledToHeight(30);
   writeArea = QRectF(QPointF(20, 5), pix.size());
   this->order = EechOrder::选择;
-  int fontId = QFontDatabase::addApplicationFont(":/p/res/font/XiaoKeNa.ttf");
+  int fontId = QFontDatabase::addApplicationFont(":/GrapUi/font/XiaoKeNa.ttf");
   QString fontFamily = QFontDatabase::applicationFontFamilies(fontId).at(0);
   font.setFamily(fontFamily);
   font.setPointSize(15);

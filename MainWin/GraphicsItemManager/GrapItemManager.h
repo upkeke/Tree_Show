@@ -2,18 +2,23 @@
 #ifndef __GRAPITEMMANAGER__
 #define __GRAPITEMMANAGER__
 #include "Grap_Bin.h"
-#include <NodeStr.hpp>
+
+#include <QStrNode.hpp>
 #include <config.h>
 #include <memory>
 #include <unordered_map>
-//#include<BinaryTreeStr.hpp>
+// #include<BinaryTreeStr.hpp>
 
 using std::unordered_map;
 class GrapNodeItem;
 class GrapLineItem;
 class QGraphicsScene;
 class GrapMoveItem;
-class QObject;
+class QGraphicsItemGroup;
+namespace sbt {
+class BinaryTreeStr;
+
+}
 /**
  * @brief 这个是一个图元观测器
  不负责GrapLineItem和GrapNodeItem GrapMoveItem的释放
@@ -31,7 +36,8 @@ public:
    * @param nodeptr
    * @return GrapNodeItem* 获得的节点图元
    */
-  GrapNodeItem *getGrapNode(sbt::NodePtr nodeptr, bool &isNew);
+  GrapNodeItem *getGrapNode(sbt::NodePtr nodeptr, bool &isNew,
+                            QGraphicsItemGroup *grp);
   /**
    * @brief  显示或者显示深度
    *
@@ -46,11 +52,14 @@ public:
    * @return GrapNodeItem* 包含节点指针的图元
    */
   GrapNodeItem *whereGrapNode(sbt::NodePtr nodeptr);
+  std::pair<sbt::BinaryTreeStr *, QGraphicsItemGroup *>
+  treeWithItemGroup(sbt::BinaryTreeStr *, QGraphicsItemGroup *);
+
   /**
    * @brief 图元根据节点位置归位
    *
    */
-  void updateGrapNodePos(sbt::NodePtr head,const QPointF &offset);
+  void updateGrapNodePos(sbt::NodePtr head, const QPointF &offset);
   /**
    * @brief G构造一个直线图元，用于连接2个树节点
    如果还有剩余，设置一些它的2个断点，直接返回
@@ -61,6 +70,8 @@ public:
    * @return GrapLineItem* 直线图元的地址
    */
   GrapLineItem *getGrapLine(GrapNodeItem *front, GrapNodeItem *end);
+  GrapLineItem *getGrapLine(GrapNodeItem *front, GrapNodeItem *end,
+                            bool isleft);
   /**
    * @brief 一个运动图元
 

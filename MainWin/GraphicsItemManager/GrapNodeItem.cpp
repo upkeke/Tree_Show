@@ -50,7 +50,7 @@ void GrapNodeItem::initMenu() {
       }
     }
     if (father != nullptr) {
-      qDebug() << "父节点是 " << QString::fromStdString(father->val);
+      qDebug() << "父节点是 " << father->val;
       nodeptr->isHead = true;
       actionOnlyHead();
       // menu->addActions(const QList<QAction *> &actions)
@@ -70,13 +70,13 @@ void GrapNodeItem::initMenu() {
   }
 }
 void GrapNodeItem::actionOnlyHead() {
-  auto a1 = menu->addAction("更新位置到此处");
-  connect(a1, &QAction::triggered, [this]() {
-    auto offset = this->nodeptr->getOffsetByNowPos(this->pos());
-    // this->nodeptr->color = NodeColor::gray;
-    // this->scene()->update();
-    emit updateTreePos(this->nodeptr, offset);
-  });
+  // auto a1 = menu->addAction("更新位置到此处");
+  // connect(a1, &QAction::triggered, [this]() {
+  //   auto offset = this->nodeptr->getOffsetByNowPos();
+  //   // this->nodeptr->color = NodeColor::gray;
+  //   // this->scene()->update();
+  //   emit updateTreePos(this->nodeptr, offset);
+  // });
   auto a2 = menu->addAction("变成主角");
   connect(a2, &QAction::triggered, [this]() { emit beStar(nodeptr); });
 }
@@ -84,21 +84,20 @@ void GrapNodeItem::paint(QPainter *painter,
                          const QStyleOptionGraphicsItem *option,
                          QWidget *widget) {
   painter->setBrush(nodeptr->color);
-  painter->drawEllipse(QPointF(0, 0), radius, radius);
-
+  if (isSelected()) {
+    pen.setStyle(Qt::DotLine);
+  } else {
+    pen.setStyle(Qt::SolidLine);
+  }
   painter->setPen(pen);
+  painter->drawEllipse(QPointF(0, 0), radius, radius);
 
   painter->setFont(QFont("微软雅黑", 15));
   if (isShowDepth) {
     painter->drawText(boundingRect(), Qt::AlignCenter,
                       QString::number(nodeptr->col));
   } else {
-#if HAS_QSTRING
     painter->drawText(boundingRect(), Qt::AlignCenter, nodeptr->val);
-#else
-    painter->drawText(boundingRect(), Qt::AlignCenter,
-                      QString::fromStdString(nodeptr->val));
-#endif
   }
 }
 QPainterPath GrapNodeItem::shape() const {
@@ -110,7 +109,7 @@ void GrapNodeItem::contextMenuEvent(QGraphicsSceneContextMenuEvent *event) {
   menu->exec(event->screenPos());
 }
 
-void GrapNodeItem::setVal(const _string &val) {
+void GrapNodeItem::setVal(const QString &val) {
   this->val = val;
   scene()->update();
 }
@@ -132,16 +131,17 @@ QRectF GrapNodeItem::boundingRect() const {
   return QRectF(QPointF(-radius, -radius), QSizeF(radius * 2, radius * 2));
 }
 void GrapNodeItem::mouseMoveEvent(QGraphicsSceneMouseEvent *event) {
-  if (isNew)
-    if (this->isSelected()) {
+  QGraphicsItem::mouseMoveEvent(event);
+  if (this->isSelected()) {
+    if (isHead) {
       auto ls = collidingItems();
       if (ls.size() > 0) {
         emit andOther(ls[0]);
       }
     }
-  nodeptr->setPos(pos());
-  this->scene()->update();
-  QGraphicsItem::mouseMoveEvent(event);
+    nodeptr->setPos(pos());
+    this->scene()->update();
+  }
 }
 
 void GrapNodeItem::setBackColor(NodeColor ncolor) {
@@ -155,6 +155,6 @@ void GrapNodeItem::setBackColor(NodeColor ncolor) {
 void GrapNodeItem::reSet(NodePtr nodeptr) { this->nodeptr = nodeptr; }
 sbt::NodePtr GrapNodeItem::getNodePtr() { return this->nodeptr; }
 void GrapNodeItem::setRadius(int radius) { this->radius = radius; }
-void GrapNodeItem::setIsNew(bool flag) { this->isNew = flag; }
+//void GrapNodeItem::setIsNew(bool flag) { this->isNew = flag; }
 void GrapNodeItem::SetIsShowDepth(bool flag) { this->isShowDepth = flag; }
 GrapNodeItem::~GrapNodeItem() { delete menu; }

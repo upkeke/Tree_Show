@@ -5,14 +5,14 @@
 #define __ANIMMANAGER__
 
 #include "Anim_Bin1.h"
-#include <NodeStr.hpp>
 #include <QList>
 #include <QObject>
 #include <QPointF>
+#include <QStrNode.hpp>
 #include <array>
 #include <memory>
 #include <vector>
-
+#include<QPropertyAnimation>
 // inline qreal disBtwItem(const QPointF &p1, const QPointF &p2) {
 //   auto p = p1 - p2;
 //   return std::sqrt(p.rx() * p.rx() + p.y() * p.y());
@@ -29,7 +29,8 @@ class ANIM_LIB_EXPORT_XX AnimManager : public QObject {
 public:
   static std::shared_ptr<AnimManager>
   instance(GrapMoveItem *_五角星图元,
-           const std::array<UiForeachBtn *, 4> &_遍历列表图元);
+           const std::array<UiForeachBtn *, 4> &_遍历列表图元,
+           std::shared_ptr<GrapItemManager> grapPool);
   void _列表展开动画(QPointF startPos);
   void _列表收起动画(QPointF startPos);
   /**
@@ -54,14 +55,14 @@ public:
    还有一个效果，就是五角星访问到节点图元的时候，节点图元会放大1.5倍，然后缩小
    *
    */
-  void _五角星遍历动画(_SPC vector<sbt::NodePtr> nodeptr_list,
-                       std::shared_ptr<GrapItemManager> grapPool);
+  void _五角星遍历动画(_SPC vector<sbt::NodePtr> nodeptr_list);
   ~AnimManager();
-
+  using KeyValue = QVariantAnimation::KeyValue;
 private:
+
   AnimManager(GrapMoveItem *_五角星图元,
               const std::array<UiForeachBtn *, 4> &_遍历列表图元,
-              QObject *parent = nullptr);
+              std::shared_ptr<GrapItemManager> grapPool);
 
   inline static std::shared_ptr<AnimManager> manager = nullptr;
   /**
@@ -70,6 +71,9 @@ private:
    */
   QParallelAnimationGroup *_五角星动画组 = nullptr;
   GrapMoveItem *_五角星图元;
+  _SPC vector<sbt::NodePtr> nodeptr_list;
+  int curIndex = 0;
+  std::shared_ptr<GrapItemManager> grapPool;
   /**
    * @brief 当要切换遍历方式的时候，会出现下拉菜单，每一个遍历框会依序滑进来
    *

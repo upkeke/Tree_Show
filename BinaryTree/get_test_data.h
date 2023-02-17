@@ -3,7 +3,7 @@
 #pragma once
 #ifndef __GET_TEST_DATA__
 #define __GET_TEST_DATA__
-#include <NodeStr.hpp>
+#include <QStrNode.hpp>
 #include <QString>
 #include <config.h>
 

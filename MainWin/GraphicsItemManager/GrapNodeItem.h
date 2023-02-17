@@ -7,9 +7,11 @@
 #include <QGraphicsItem>
 class GrapLineItem;
 #include "Grap_Bin.h"
-#include <NodeStr.hpp>
+
 #include <QPen>
+#include <QStrNode.hpp>
 #include <config.h>
+
 class MainWin;
 class GRAP_LIB_EXPORT GrapNodeItem : public QObject, public QGraphicsItem {
   Q_OBJECT
@@ -22,6 +24,9 @@ class GRAP_LIB_EXPORT GrapNodeItem : public QObject, public QGraphicsItem {
   Q_PROPERTY(qreal scale READ scale WRITE setScale)
 public:
   friend class GrapItemManager;
+  enum { Type = UserType + 1 };
+  // enum { Type = UserType + 1 };
+  int type() const override { return Type; }
   /**
    * @brief 重新设置图元的位置，颜色
    *
@@ -29,8 +34,8 @@ public:
    */
   void reSet(sbt::NodePtr nodeptr);
   sbt::NodePtr getNodePtr();
-  void setVal(const _string &num);
-  _string strVal() { return val; }
+  void setVal(const QString &num);
+  QString strVal() { return val; }
   /**
    * @brief 发现一个直线和图元相连。把它添加到lineArry
    *
@@ -67,7 +72,7 @@ public:
    * @param order_h
    */
   void setRadius(int order_h = 30);
-  void setIsNew(bool flag);
+  // void setIsNew(bool flag);
   void SetIsShowDepth(bool flag);
   ~GrapNodeItem();
 signals:
@@ -77,11 +82,9 @@ signals:
    * @param other
    */
   void andOther(QGraphicsItem *other);
-  /**
-   * @brief 更新树的所有节点的场景位置
-   *
-   */
-  void updateTreePos(sbt::NodePtr head, const QPointF &offset);
+
+  // void updateTreePos(sbt::NodePtr head, const QPointF &offset);
+
   /**
    * @brief 截断二叉树，当前选中节点作为新的树的根节点
    *
@@ -112,17 +115,20 @@ private:
   void initMenu();
   /**
    * @brief 如果是根节点会有更多的action
-   * 
+   *
    */
   void actionOnlyHead();
 
   _SPC vector<GrapLineItem *> lineArry{};
-  QPen pen{Qt::black};
+  QPen pen{Qt::black, 2};
   sbt::NodePtr nodeptr = nullptr;
-  _string val;
+  QString val;
   int radius = 15;
-  bool isNew = false;
   bool isShowDepth = false;
   QMenu *menu = nullptr;
+
+public:
+  //如果是头节点
+  bool isHead = false;
 };
 #endif

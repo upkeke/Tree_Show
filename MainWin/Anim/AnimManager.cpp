@@ -14,9 +14,9 @@ qreal disBtwItem(const QPointF &p1, const QPointF &p2) {
 }
 AnimManager::AnimManager(GrapMoveItem *_五角星图元,
                          const std::array<UiForeachBtn *, 4> &_遍历列表图元,
-                         QObject *parent)
-    : QObject(parent) {
+                         std::shared_ptr<GrapItemManager> _grapPool) {
   this->_五角星图元 = _五角星图元;
+  this->grapPool = _grapPool;
   _五角星动画组 = new QParallelAnimationGroup();
   QPropertyAnimation *am1 = new QPropertyAnimation(_五角星图元, "pos");
   QPropertyAnimation *am2 = new QPropertyAnimation(_五角星图元, "rotation");
@@ -24,7 +24,35 @@ AnimManager::AnimManager(GrapMoveItem *_五角星图元,
   _五角星动画组->addAnimation(am2);
   auto scene = this->_五角星图元->scene();
   connect(am1, &QPropertyAnimation::valueChanged,
-          [scene](const QVariant &value) { scene->update(); });
+          [this, scene](const QVariant &value) {
+            if (curIndex >= nodeptr_list.size()) {
+              curIndex = 0;
+              return;
+            }
+
+            qreal dis =
+                disBtwItem(nodeptr_list[curIndex]->Pos(), value.toPointF());
+            if (dis < 20) {
+              nodeptr_list[curIndex]->color = sbt::NodeColor::green;
+              // 当五角星靠近图元节点的时候放大节点图元，然后复原
+              QPropertyAnimation *tpanm = new QPropertyAnimation(
+                  grapPool->whereGrapNode(nodeptr_list[curIndex]), "scale");
+              tpanm->setDuration(1000);
+              tpanm->setStartValue(1.0);
+              tpanm->setKeyValueAt(0.5, 1.5);
+              tpanm->setEndValue(1.0);
+              tpanm->setEasingCurve(QEasingCurve::OutBounce);
+              connect(tpanm, &QPropertyAnimation::currentLoopChanged, tpanm,
+                      [tpanm](int currentLoop) {
+                        if (currentLoop == 1) {
+                          tpanm->setDirection(QPropertyAnimation::Backward);
+                        }
+                      });
+              curIndex++;
+              tpanm->start(QPropertyAnimation::DeleteWhenStopped);
+            }
+            scene->update();
+          });
   connect(am2, &QPropertyAnimation::valueChanged,
           [scene](const QVariant &value) { scene->update(); });
 
@@ -49,10 +77,11 @@ AnimManager::AnimManager(GrapMoveItem *_五角星图元,
 
 std::shared_ptr<AnimManager>
 AnimManager::instance(GrapMoveItem *_五角星图元,
-                      const std::array<UiForeachBtn *, 4> &_遍历列表图元) {
+                      const std::array<UiForeachBtn *, 4> &_遍历列表图元,
+                      std::shared_ptr<GrapItemManager> _grapPool) {
   if (manager == nullptr) {
     manager = std::shared_ptr<AnimManager>(
-        new AnimManager(_五角星图元, _遍历列表图元));
+        new AnimManager(_五角星图元, _遍历列表图元, _grapPool));
   }
 
   return manager;
@@ -119,52 +148,29 @@ void AnimManager::_遍历列表展开收起动画(QObject *root) {
   rroot->set_IsOpen(flag);
 }
 
-void AnimManager::_五角星遍历动画(_SPC vector<sbt::NodePtr> nodeptr_list,
-                                  std::shared_ptr<GrapItemManager> grapPool) {
+void AnimManager::_五角星遍历动画(_SPC vector<sbt::NodePtr> _nodeptr_list) {
+  this->nodeptr_list = _nodeptr_list;
+  this->curIndex = 0;
+  // _SPC vector<sbt::NodePtr> nodeptr_list;
   QPropertyAnimation *am1 =
       static_cast<QPropertyAnimation *>(_五角星动画组->animationAt(0));
   QPropertyAnimation *am2 =
       static_cast<QPropertyAnimation *>(_五角星动画组->animationAt(1));
+  auto xx = am1->keyValues();
   am1->setDuration(10000);
   am1->setStartValue(QPointF{-30, -30});
+  int sz = nodeptr_list.size();
+  QList<KeyValue> ls;
+  for (double i = 1; i <= sz; ++i) {
+    ls.push_back({i / (sz + 1), nodeptr_list[i - 1]->Pos()});
+    //这个不会替换之前的值，只会插值
+    // am1->setKeyValueAt(i / (sz + 1), nodeptr_list[i -1]->Pos());
+  }
+  am1->setKeyValues(ls);
   am1->setEndValue(QPointF{-30, -30});
   am2->setDuration(10000);
   am2->setStartValue(0);
   am2->setEndValue(1800);
-  int sz = nodeptr_list.size();
-  for (double i = 1; i <= sz; ++i) {
-    am1->setKeyValueAt(i / (sz + 1), nodeptr_list[i - 1]->Pos());
-  }
-  // 节点的动画
-  connect(
-      am1, &QPropertyAnimation::valueChanged, this,
-      [nodeptr_list, grapPool, curIndex = 0](const QVariant &value) mutable {
-        if (curIndex < nodeptr_list.size()) {
-          qreal dis =
-              disBtwItem(nodeptr_list[curIndex]->Pos(), value.toPointF());
-          if (dis < 20) {
-            nodeptr_list[curIndex]->color = sbt::NodeColor::green;
-            // 当五角星靠近图元节点的时候放大节点图元，然后复原
-            QPropertyAnimation *tpanm = new QPropertyAnimation(
-                grapPool->whereGrapNode(nodeptr_list[curIndex]), "scale");
-            tpanm->setDuration(1000);
-            tpanm->setStartValue(1.0);
-            tpanm->setKeyValueAt(0.5, 1.5);
-            tpanm->setEndValue(1.0);
-            tpanm->setEasingCurve(QEasingCurve::OutBounce);
-            connect(tpanm, &QPropertyAnimation::currentLoopChanged, tpanm,
-                    [tpanm](int currentLoop) {
-                      if (currentLoop == 1) {
-                        tpanm->setDirection(QPropertyAnimation::Backward);
-                      }
-                    });
-            curIndex++;
-            tpanm->start(QPropertyAnimation::DeleteWhenStopped);
-          }
-        } else {
-          curIndex = 0;
-        }
-      });
 
   _五角星动画组->start();
 }

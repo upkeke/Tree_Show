@@ -1,12 +1,12 @@
 ﻿project(GrapItemManager)
 
-set(manager_src 
+set(${PROJECT_NAME}_SRC 
     GrapNodeItem.cpp
     GrapLineItem.cpp
     GrapItemManager.cpp
     GrapMoveItem.cpp
 )
-add_library(${PROJECT_NAME} SHARED ${manager_src})
+add_library(${PROJECT_NAME} SHARED ${${PROJECT_NAME}_SRC})
 target_compile_definitions(${PROJECT_NAME} 
     PRIVATE
     GRAP_LIB
