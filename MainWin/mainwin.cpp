@@ -18,16 +18,21 @@
 
 using namespace sbt;
 
+QGraphicsItemGroup *getItemGroup(QGraphicsScene *scene) {
+  auto x = new QGraphicsItemGroup();
+  scene->addItem(x);
+  x->setZValue(0.5);
+  return x;
+}
 MainWin::MainWin(QWidget *parent)
     : QMainWindow(parent), ui(new Ui::BinaryTreeWin),
       curtree(new sbt::BinaryTreeStr) {
-  trees[curtree] = new QGraphicsItemGroup();
   ui->setupUi(this);
   scene = new ThScene(this);
   ui->view->setScene(scene); // QGraphicsView
+  trees[curtree] = getItemGroup(scene);
   ui->view->show();
   init_pool();
-
 
   connect(ui->actionbuild, &QAction::triggered, this, &MainWin::action_build);
   connect(ui->actrefresh, &QAction::triggered, this, [this]() {
@@ -106,7 +111,7 @@ void MainWin::headNodeItemConnect(GrapNodeItem *headItem) {
   auto new_node = new_item->getNodePtr();
   connect(new_item, &GrapNodeItem::andOther,
           [this, new_item, new_node](QGraphicsItem *other) {
-            GrapNodeItem *base_item = dynamic_cast<GrapNodeItem *>(other);
+            GrapNodeItem *base_item = qgraphicsitem_cast<GrapNodeItem *>(other);
             if (base_item != nullptr) {
               auto base_node = base_item->getNodePtr();
               // 如果base_node可插入
@@ -156,27 +161,13 @@ void MainWin::print_tree(NodePtr head) {
   }
   for (auto ptr : a节点集合) {
     bool isNew = false;
-    GrapNodeItem *curNodeItem = grapPool->getGrapNode(ptr, isNew);
+    GrapNodeItem *curNodeItem =
+        grapPool->getGrapNode(ptr, isNew, trees[curtree]);
     if (isNew) {
       NodeItemConnect(curNodeItem);
     }
-    // 连接父节点到子节点的线    beStar
-    for (size_t j = 0; j < 2; ++j) {
-      NodePtr child = nullptr;
-
-      if (j == 0)
-        child = ptr->left;
-      else
-        child = ptr->right;
-      if (child != nullptr) {
-        QTransform transform;
-        QPointF point(child->Pos());
-        GrapNodeItem *end =
-            qgraphicsitem_cast<GrapNodeItem *>(scene->itemAt(point, transform));
-        GrapLineItem *curLineItem = grapPool->getGrapLine(curNodeItem, end);
-        curLineItem->setIsLeftLine(j == 0);
-      }
-    }
+    // 连接父节点到子节点的线
+    grapPool->LineNodeToChild(curNodeItem);
   }
   grapPool->hideSurplus();
   scene->update();
@@ -207,7 +198,7 @@ void MainWin::action_add_node() {
   qDebug() << "action_add_node 新建一个node";
   new_node->setPos(QPointF(-60, -60));
   bool f;
-  GrapNodeItem *new_item = grapPool->getGrapNode(new_node, f);
+  GrapNodeItem *new_item = grapPool->getGrapNode(new_node, f, trees[curtree]);
   new_item->isHead = true;
   NodeItemConnect(new_item);
 }

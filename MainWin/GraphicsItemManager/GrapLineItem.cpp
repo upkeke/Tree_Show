@@ -11,7 +11,7 @@ GrapLineItem::GrapLineItem(GrapNodeItem *front, GrapNodeItem *end,
     return;
   }
   setZValue(-1);                            // 让线的图层 在front的下面
-  setFlag(QGraphicsItem::ItemIsSelectable); // 线段可选择的
+  //setFlag(QGraphicsItem::ItemIsSelectable); // 线段可选择的
   QPen pen(Qt::red);
 
   pen.setWidth(3);

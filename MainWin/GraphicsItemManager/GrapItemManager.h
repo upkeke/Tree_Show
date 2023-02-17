@@ -39,6 +39,13 @@ public:
   GrapNodeItem *getGrapNode(sbt::NodePtr nodeptr, bool &isNew,
                             QGraphicsItemGroup *grp);
   /**
+   * @brief 生成连接子节点的直线
+   * 
+   * @param father 
+   */ 
+  void LineNodeToChild(GrapNodeItem * fatherItem);
+
+  /**
    * @brief  显示或者显示深度
    *
    * @param flag true 显示深度，false显示val

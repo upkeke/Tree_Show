@@ -12,7 +12,7 @@ public:
   // TeScene() = default;
 
 protected:
-  bool event(QEvent *event) override;
+  //bool event(QEvent *event) override;
   void mouseMoveEvent(QGraphicsSceneMouseEvent *event) override;
   void mousePressEvent(QGraphicsSceneMouseEvent *event) override;
   void mouseReleaseEvent(QGraphicsSceneMouseEvent *event) override;

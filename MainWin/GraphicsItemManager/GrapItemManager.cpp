@@ -32,6 +32,7 @@ GrapNodeItem *GrapItemManager::getGrapNode(NodePtr nodeptr, bool &isNew,
     item->reSet(nodeptr);
     isNew = false;
   }
+  grp->addToGroup(item);
   nodeToGrapNode[nodeptr] = item;
   curNodeindex++;
   item->show();
@@ -86,8 +87,24 @@ void GrapItemManager::updateGrapNodePos(sbt::NodePtr head,
       },
       offset, nodeToGrapNode, row);
 }
+void GrapItemManager::LineNodeToChild(GrapNodeItem * fatherItem) {
+  auto fatherNode = fatherItem->getNodePtr();
+  for (size_t j = 0; j < 2; ++j) {
+    NodePtr childNode = nullptr;
+    if (j == 0)
+      childNode = fatherNode->left;
+    else
+      childNode = fatherNode->right;
+    if (childNode != nullptr) {
+      // 后序遍历，子节点图元必然先于父节点创建，可以不判断nodeToGrapNode[childNode]
+      auto childItem = nodeToGrapNode[childNode];
+      GrapLineItem *curLineItem = getGrapLine(fatherItem,childItem,j == 0);
+    }
+  }
+}
 GrapLineItem *GrapItemManager::getGrapLine(GrapNodeItem *front,
                                            GrapNodeItem *end) {
+
   auto temp = grapLinePool.size();
   GrapLineItem *item = nullptr;
   if (curLineIndex == temp) {
