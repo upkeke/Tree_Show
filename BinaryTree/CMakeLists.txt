@@ -5,8 +5,8 @@ add_subdirectory(container)
 
 find_package(Qt6 REQUIRED Sql Widgets Core)
 
-add_library(FuncForHeadNode SHARED FuncForHeadNode.cpp)
-target_link_libraries(FuncForHeadNode
+add_library(HeadNode SHARED FuncForHeadNode.cpp HeadNode.cpp)
+target_link_libraries(HeadNode
         PUBLIC
         Qt6::Core
 )

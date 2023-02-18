@@ -11,8 +11,7 @@ class GrapLineItem;
 #include <QPen>
 #include <QStrNode.hpp>
 #include <config.h>
-
-class MainWin;
+class QAction;
 class GRAP_LIB_EXPORT GrapNodeItem : public QObject, public QGraphicsItem {
   Q_OBJECT
   Q_INTERFACES(QGraphicsItem)
@@ -25,14 +24,13 @@ class GRAP_LIB_EXPORT GrapNodeItem : public QObject, public QGraphicsItem {
 public:
   friend class GrapItemManager;
   enum { Type = UserType + 1 };
-  // enum { Type = UserType + 1 };
   int type() const override { return Type; }
   /**
    * @brief 重新设置图元的位置，颜色
    *
    * @param node 根据的节点
    */
-  void reSet(sbt::NodePtr nodeptr);
+  // void reSet(sbt::NodePtr nodeptr);
   sbt::NodePtr getNodePtr();
   void setVal(const QString &num);
   QString strVal() { return val; }
@@ -41,18 +39,21 @@ public:
    *
    * @param line
    */
-  void addLine(GrapLineItem *line);
+  void setChildLines(GrapLineItem *line, bool isLeft);
+  void setFatherItem(GrapNodeItem *father);
+  GrapNodeItem *getFatherItem();
   /**
    * @brief 清空lineArry，并隐藏
    *
    * @return int
    */
-  int reMoveLines();
+  std::array<GrapLineItem *, 2> reMoveLines();
+  GrapLineItem *rmoveLine(bool isLeft);
   /**
    * @brief 清空lineArry，不隐藏
    *
    */
-  void clearLines(); // 这个只是清空lineArry，但不隐藏其中的图元
+  // void clearLines(); // 这个只是清空lineArry，但不隐藏其中的图元
   void paint(QPainter *painter, const QStyleOptionGraphicsItem *option,
              QWidget *widget) override;
   QRectF boundingRect() const override;
@@ -72,16 +73,27 @@ public:
    * @param order_h
    */
   void setRadius(int order_h = 30);
-  // void setIsNew(bool flag);
   void SetIsShowDepth(bool flag);
+  bool isHeadItem() { return nodePtr == headPtr; }
+  void setHeadPtr(sbt::NodePtr head);
+  sbt::NodePtr getHeadPtr();
+  /**
+   * @brief 不会构造menu，
+   只是设置nodeptr，和headPtr，然后显示该显示的action
+   *
+   * @param nodeptr
+   * @param headPtr
+   */
+  void reSet(sbt::NodePtr nodeptr, sbt::NodePtr headPtr);
   ~GrapNodeItem();
 signals:
   /**
-   * @brief 碰到其他图元发射其他图元
+   * @brief 将sub树合并到main树
    *
-   * @param other
+   * @param main 树的根节点图元
+   * @param sub
    */
-  void andOther(QGraphicsItem *other);
+  void mergeToOther(GrapNodeItem *main, GrapNodeItem *sub);
 
   // void updateTreePos(sbt::NodePtr head, const QPointF &offset);
 
@@ -102,7 +114,8 @@ signals:
    * @param node
    */
   void beStar(sbt::NodePtr node);
-  void addChildNode(bool isLeft, sbt::NodePtr node);
+  // void addChildNode(bool isLeft, sbt::NodePtr node);
+  void deleteNodeItem(GrapNodeItem *headItem);
 
 private:
   /**
@@ -111,24 +124,31 @@ private:
    * @param nodeptr 传入节点指针
    * @param parent
    */
-  explicit GrapNodeItem(sbt::NodePtr nodeptr, QGraphicsItem *parent = nullptr);
+  explicit GrapNodeItem(sbt::NodePtr nodeptr, sbt::NodePtr headPtr,
+                        QGraphicsItem *parent = nullptr);
   void initMenu();
-  /**
-   * @brief 如果是根节点会有更多的action
-   *
-   */
-  void actionOnlyHead();
-
-  _SPC vector<GrapLineItem *> lineArry{};
+  // 只管理和子节点的直线，不管理和父节点的直线，0为左子节点，1为右子节点
+  std::array<GrapLineItem *, 2> lineChild{};
+  // 连接父节点直线
+  GrapNodeItem *fatherItem = nullptr;
+  //_SPC vector<GrapLineItem *> lineArry{};
   QPen pen{Qt::black, 2};
-  sbt::NodePtr nodeptr = nullptr;
   QString val;
   int radius = 15;
   bool isShowDepth = false;
   QMenu *menu = nullptr;
+  /**
+   * @brief
+   actions[0]  "变成主角"
+   actions[1]  "截断二叉树"
+   actions[2]  "设置值"
+   *
+   */
+  QList<QAction *> actions{4, nullptr};
+
+  sbt::NodePtr headPtr = nullptr;
 
 public:
-  //如果是头节点
-  bool isHead = false;
+  sbt::NodePtr nodePtr = nullptr;
 };
 #endif

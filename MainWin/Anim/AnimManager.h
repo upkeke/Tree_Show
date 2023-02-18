@@ -4,15 +4,16 @@
 #ifndef __ANIMMANAGER__
 #define __ANIMMANAGER__
 
-#include "Anim_Bin1.h"
+#include "Anim_Bin.h"
 #include <QList>
 #include <QObject>
 #include <QPointF>
+#include <QPropertyAnimation>
 #include <QStrNode.hpp>
 #include <array>
 #include <memory>
 #include <vector>
-#include<QPropertyAnimation>
+
 // inline qreal disBtwItem(const QPointF &p1, const QPointF &p2) {
 //   auto p = p1 - p2;
 //   return std::sqrt(p.rx() * p.rx() + p.y() * p.y());
@@ -24,13 +25,18 @@ class QGraphicsScene;
 class GrapMoveItem;
 class GrapItemManager;
 class UiForeachRootBtn;
-class ANIM_LIB_EXPORT_XX AnimManager : public QObject {
-  // Q_OBJECT
+enum class EechOrder;
+class ANIM_LIB_EXPORT AnimManager : public QObject {
+  Q_OBJECT
 public:
   static std::shared_ptr<AnimManager>
-  instance(GrapMoveItem *_五角星图元,
-           const std::array<UiForeachBtn *, 4> &_遍历列表图元,
-           std::shared_ptr<GrapItemManager> grapPool);
+  instance(std::shared_ptr<GrapItemManager> grapPool);
+  ~AnimManager();
+  using KeyValue = QVariantAnimation::KeyValue;
+  void setHeadNode(sbt::NodePtr *p_head);
+signals:
+  void giveMeHeadnode();
+public slots:
   void _列表展开动画(QPointF startPos);
   void _列表收起动画(QPointF startPos);
   /**
@@ -41,7 +47,7 @@ public:
    方便后面复用
    *
    */
-  void _遍历列表展开收起动画(QObject *root);
+  void _遍历列表展开收起动画();
 
   /**
    * @brief 这个函数是获得五角的动画组
@@ -55,15 +61,13 @@ public:
    还有一个效果，就是五角星访问到节点图元的时候，节点图元会放大1.5倍，然后缩小
    *
    */
-  void _五角星遍历动画(_SPC vector<sbt::NodePtr> nodeptr_list);
-  ~AnimManager();
-  using KeyValue = QVariantAnimation::KeyValue;
+  void _五角星遍历动画(EechOrder order);
+
 private:
-
-  AnimManager(GrapMoveItem *_五角星图元,
-              const std::array<UiForeachBtn *, 4> &_遍历列表图元,
-              std::shared_ptr<GrapItemManager> grapPool);
-
+  AnimManager(std::shared_ptr<GrapItemManager> grapPool);
+  void init_grap();
+  void init_anim();
+  sbt::NodePtr *p_head = nullptr;
   inline static std::shared_ptr<AnimManager> manager = nullptr;
   /**
    * @brief 五角星，遍历的运动单位，根据遍历顺序依次访问每个节点图元
@@ -79,7 +83,8 @@ private:
    *
    */
   QParallelAnimationGroup *_遍历列表展开动画组 = nullptr;
-  std::array<UiForeachBtn *, 4> _遍历列表图元{};
+  UiForeachRootBtn *_rootBtn = nullptr;
+  std::array<UiForeachBtn *, 4> childBtnList{};
 };
 
 #endif

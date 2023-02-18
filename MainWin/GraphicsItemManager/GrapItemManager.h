@@ -2,6 +2,7 @@
 #ifndef __GRAPITEMMANAGER__
 #define __GRAPITEMMANAGER__
 #include "Grap_Bin.h"
+#include <QObject>
 
 #include <QStrNode.hpp>
 #include <config.h>
@@ -25,9 +26,11 @@ class BinaryTreeStr;
 GrapNodeItem也不会负责NodePtr的释放
  *
  */
-class GRAP_LIB_EXPORT GrapItemManager {
+class GRAP_LIB_EXPORT GrapItemManager : public QObject {
+  Q_OBJECT
 public:
   static std::shared_ptr<GrapItemManager> instance(QGraphicsScene *scene);
+  QGraphicsScene *getScene();
   /**
    * @brief 获得一个节点图元
    节点图元池如果还有多余的节点图元，将它节点设置nodepter，直接返回，
@@ -37,19 +40,14 @@ public:
    * @return GrapNodeItem* 获得的节点图元
    */
   GrapNodeItem *getGrapNode(sbt::NodePtr nodeptr, bool &isNew,
-                            QGraphicsItemGroup *grp);
-  /**
-   * @brief 生成连接子节点的直线
-   * 
-   * @param father 
-   */ 
-  void LineNodeToChild(GrapNodeItem * fatherItem);
-
+                            sbt::NodePtr headptr);
+  void deleteTree(GrapNodeItem *);
   /**
    * @brief  显示或者显示深度
    *
    * @param flag true 显示深度，false显示val
    */
+  void mergeTree(GrapNodeItem *main_item, GrapNodeItem *sub_item);
   void ShowDepthOrVal(bool flag);
   /**
    * @brief 获得包含nodeptr节点的图元
@@ -59,46 +57,55 @@ public:
    * @return GrapNodeItem* 包含节点指针的图元
    */
   GrapNodeItem *whereGrapNode(sbt::NodePtr nodeptr);
-  std::pair<sbt::BinaryTreeStr *, QGraphicsItemGroup *>
-  treeWithItemGroup(sbt::BinaryTreeStr *, QGraphicsItemGroup *);
+  /**
+   * @brief 为头节点图元的每一个子节点图元设置根节点
+   *
+   * @param headItem
+   */
+  void reSetTreeNodeItemHead(GrapNodeItem *treeNodeItem, sbt::NodePtr headPtr);
 
   /**
    * @brief 图元根据节点位置归位
    *
    */
-  void updateGrapNodePos(sbt::NodePtr head, const QPointF &offset);
+  void updateGrapNodePos(sbt::NodePtr head);
   /**
-   * @brief G构造一个直线图元，用于连接2个树节点
-   如果还有剩余，设置一些它的2个断点，直接返回
-   如果没有就构造一个
+   * @brief father 和 child的位置禁止传反
    *
-   * @param front 直线的一端的树节点
-   * @param end 直线的一端的树节点
+   * @param father 直线的一端的树节点
+   * @param child 直线的一端的树节点
    * @return GrapLineItem* 直线图元的地址
    */
-  GrapLineItem *getGrapLine(GrapNodeItem *front, GrapNodeItem *end);
-  GrapLineItem *getGrapLine(GrapNodeItem *front, GrapNodeItem *end,
+  GrapLineItem *getGrapLine(GrapNodeItem *father, GrapNodeItem *child,
                             bool isleft);
+  void removeLine(GrapLineItem *line);
   /**
-   * @brief 一个运动图元
-
-   遍历每个树节点的时候需要一个图元根据遍历顺序不段的移动
-   这个函数并没有用过，可以忽略
+   * @brief 断开father和child
+   隐藏二者之间的直线
+   去掉father内包含的line
+   将
    *
-   * @param pos 图元生成的位置，在场景中坐标
-   * @return GrapMoveItem*
+   * @param father
+   * @param child
    */
-  GrapMoveItem *getGrapMove(const QPointF &pos);
+  void disconnectGrapNode(GrapNodeItem *father, GrapNodeItem *child);
+  /**
+   * @brief 生成连接子节点的直线
+   *
+   * @param father
+   */
+  void LineNodeToChild(GrapNodeItem *fatherItem);
+
   /**
    * @brief 隐藏多余的图元
    *
    */
-  void hideSurplus();
+  // void hideSurplus();
   /**
    * @brief 隐藏所有的图元
    *
    */
-  void hideNodes(sbt::NodePtr head);
+  // void hideNodes(sbt::NodePtr head);
 
   ~GrapItemManager();
 
@@ -106,10 +113,9 @@ private:
   inline static std::shared_ptr<GrapItemManager> ItemManager = nullptr;
   QGraphicsScene *scene = nullptr;
   GrapItemManager(QGraphicsScene *scene);
-  ///  @brief 节点图元池
-  _SPC vector<GrapNodeItem *> grapNodePool;
-  ///  @brief 节点池的前curNodeindex被使用
-  size_t curNodeindex = 0;
+  // 空闲的节点图元，这个freeNodePool里面GrapNodeItem含有Node
+  _SPC stack<GrapNodeItem *> freeNodePool;
+
   /**
    * @brief 通过节点指针找到节点图元
    有2种方案，
@@ -121,10 +127,7 @@ private:
    *
    */
   unordered_map<sbt::NodePtr, GrapNodeItem *> nodeToGrapNode;
-  _SPC vector<GrapLineItem *> grapLinePool;
-  size_t curLineIndex = 0;
-  _SPC vector<GrapMoveItem *> grapMovePool;
-  size_t curMoveIndex = 0;
+  _SPC stack<GrapLineItem *> freeLinePool;
 };
 
 #endif

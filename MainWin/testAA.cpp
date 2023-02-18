@@ -29,22 +29,25 @@ template <class T> inline T qgraphicsitem_cast(QGraphicsItem *item) {
 }
 } // namespace xx
 #include <QGraphicsItemGroup>
-#include <iostream>
 #include <QGraphicsScene>
+#include <iostream>
+
 void func1() {
   QGraphicsItemGroup *gp = new QGraphicsItemGroup();
   X2 *x = new X2();
   gp->addToGroup(x);
   QGraphicsScene sc;
   sc.addItem(x);
-  std::cout << (x->parentItem() == gp)<<'\n';
-  //std::cout << (x->parentItem() == &sc)<<'\n';
+  std::cout << (x->parentItem() == gp) << '\n';
+  // std::cout << (x->parentItem() == &sc)<<'\n';
 }
 #include <unordered_map>
-void func2() {
-  
+void func2(int x, int y = 2, int z = 3) {
+  std::cout << x << '\t' << y << '\t' << z << '\t';
 }
 int main(int argc, char *argv[]) {
   func1();
+  std::vector<int> ar;
+  ar.emplace_back(10);
   return 0;
 }

@@ -7,6 +7,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(CMAKE_PREFIX_PATH "C:/Qt/6.4.2/mingw_64") # 设置qt动态库的路径
 set(CMAKE_AUTOMOC ON)
+
 # set(CMAKE_AUTORCC ON)
 # set(CMAKE_AUTOUIC ON)
 
@@ -28,11 +29,9 @@ qt_standard_project_setup()
 if(MSVC)
     add_compile_options("$<$<CXX_COMPILER_ID:MSVC>:/utf-8>")
     set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
-    set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 endif()
 
 #message("Qt6Widgets_INCLUDE_DIRS >> ${Qt6Widgets_INCLUDE_DIRS}")
-#include_directories(BEFORE ${Qt6Widgets_INCLUDE_DIRS})
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/bin)
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/lib)
 

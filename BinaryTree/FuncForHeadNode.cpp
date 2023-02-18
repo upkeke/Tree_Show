@@ -8,14 +8,14 @@ QPointF operator*(const PosStrNode &ps, const QPointF &pt) {
 }
 QPointF operator*(const QPointF &pt, const PosStrNode &ps) { return ps * pt; }
 //_修正节点横坐标
-void update_row(NodePtr head) {
-  int row = 0;
+void update_row(NodePtr head, int base_row) {
+  int row = base_row;
   sbt::foreach_mid(
       head, [](NodePtr cur, int &_row) { cur->row = _row++; }, row);
 }
 //_修正节点横坐标
-void update_row(NodePtr head, const QPointF &offset) {
-  int row = 0;
+void update_row(NodePtr head, const QPointF &offset, int base_row) {
+  int row = base_row;
   sbt::foreach_mid(
       head,
       [](NodePtr cur, int &_row, const QPointF &_offset) {
@@ -24,14 +24,37 @@ void update_row(NodePtr head, const QPointF &offset) {
       },
       row, offset);
 }
-//_修正节点纵坐标
-void update_col(NodePtr head, const QPointF &offset) {
+void update_col(NodePtr head, int base_col) {
   if (head == nullptr)
     return;
   _SPC queue<NodePtr> qe;
   qe.push(head);
   qe.push(nullptr);
-  int index = 0;
+  int index = base_col;
+  do {
+    NodePtr node = qe.front();
+    qe.pop();
+    if (node != nullptr) {
+      node->col = index;
+      // cout << node->val << " ";
+      if (node->left)
+        qe.push(node->left);
+      if (node->right)
+        qe.push(node->right);
+    } else if (!qe.empty()) {
+      qe.push(nullptr);
+      ++index;
+    }
+  } while (!qe.empty());
+}
+//_修正节点纵坐标
+void update_col(NodePtr head, const QPointF &offset, int base_col) {
+  if (head == nullptr)
+    return;
+  _SPC queue<NodePtr> qe;
+  qe.push(head);
+  qe.push(nullptr);
+  int index = base_col;
   do {
     NodePtr node = qe.front();
     qe.pop();
@@ -51,7 +74,7 @@ void update_col(NodePtr head, const QPointF &offset) {
 }
 
 // 修正坐标
-void update_xy(NodePtr head, const QPointF &offset) {
+void update_xy(NodePtr head, const QPointF &offset ) {
   if (head == nullptr)
     return;
   update_row(head);

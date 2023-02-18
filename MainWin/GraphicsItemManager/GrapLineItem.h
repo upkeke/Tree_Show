@@ -16,16 +16,16 @@ class GrapNodeItem;
  */
 class GRAP_LIB_EXPORT GrapLineItem : public QGraphicsLineItem {
 public:
-  GrapLineItem(GrapNodeItem *front, GrapNodeItem *end,
+  GrapLineItem(GrapNodeItem *father, GrapNodeItem *child,bool isLeft,
                QGraphicsItem *parent = nullptr);
-  void setTwo(GrapNodeItem *front, GrapNodeItem *end);
+  void setTwo(GrapNodeItem *father, GrapNodeItem *child,bool isLeft);
   bool isLeftLine();
   void setIsLeftLine(bool isleft);
-  std::array<GrapNodeItem *, 2> getFrontEnd() { return {front, end}; }
+  std::array<GrapNodeItem *, 2> getFrontEnd() { return {father, child}; }
 
 private:
-  GrapNodeItem *front;
-  GrapNodeItem *end;
+  GrapNodeItem *father;
+  GrapNodeItem *child;
   bool isleft = true;
 
   void paint(QPainter *painter, const QStyleOptionGraphicsItem *option,

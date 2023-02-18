@@ -11,7 +11,7 @@
 --------------------------------------------------------------
 */
 
-#include "GrapUi_Bin.h"
+#include "Anim_Bin.h"
 #include <QFont>
 #include <QGraphicsItem>
 #include <QObject>
@@ -24,7 +24,7 @@ enum class EechOrder { 先序, 中序, 后序, 层级, 选择 };
  作用，点击后会开始五角星遍历动画，且修改列表根按钮的值
  *
  */
-class GRAPUI_LIB_EXPORT UiForeachBtn : public QObject, public QGraphicsItem {
+class ANIM_LIB_EXPORT UiForeachBtn : public QObject, public QGraphicsItem {
   Q_OBJECT
   Q_INTERFACES(QGraphicsItem)
   Q_PROPERTY(QPointF pos READ pos WRITE setPos)
@@ -61,7 +61,7 @@ protected:
  作用是点击后生成子列表，再次点击则收起
  *
  */
-class GRAPUI_LIB_EXPORT UiForeachRootBtn : public UiForeachBtn {
+class ANIM_LIB_EXPORT UiForeachRootBtn : public UiForeachBtn {
   Q_OBJECT
 public:
   UiForeachRootBtn();
@@ -71,7 +71,7 @@ public:
   void set_IsOpen(bool flag);
   void set_order(EechOrder order);
 signals:
-  void RootBtnPress(QObject *);
+  void RootBtnPress();
 
 private:
   // 子列表是否被展开
@@ -87,15 +87,54 @@ private:
  点击后会建立二叉树，再次点击会清空二叉树
  *
  */
-class GRAPUI_LIB_EXPORT UiBuildClearBtn : public QObject, public QGraphicsItem {
+class ANIM_LIB_EXPORT UiBuildClearBtn : public QObject, public QGraphicsItem {
   Q_OBJECT
   Q_INTERFACES(QGraphicsItem)
 public:
   UiBuildClearBtn();
-  void func1() {
-
-    this->parent();
-    this->parentItem();
-  }
 };
+
+/*------------------------------------------------------------
+--------------------------------------------------------------
+--------------------------------------------------------------
+*/
+
+/**
+ * @brief 五角星
+ *
+ */
+class ANIM_LIB_EXPORT GrapMoveItem : public QObject, public QGraphicsItem {
+  Q_OBJECT
+  Q_INTERFACES(QGraphicsItem)
+  /**
+   * @brief 注册pos属性
+   *
+   */
+  Q_PROPERTY(QPointF pos READ pos WRITE setPos)
+  /**
+   * @brief 注册旋转属性
+   *
+   */
+  Q_PROPERTY(qreal rotation READ rotation WRITE setRotation)
+public:
+  GrapMoveItem() : QGraphicsItem(nullptr) { setZValue(3); }
+  explicit GrapMoveItem(QPointF mPos, QGraphicsItem *parent = nullptr);
+  void contextMenuEvent(QGraphicsSceneContextMenuEvent *event) override;
+  // 讲解contextM
+  void paint(QPainter *painter, const QStyleOptionGraphicsItem *option,
+             QWidget *widget = nullptr) override;
+  /**
+   * @brief 设置五角星的外接圆的半径
+   *
+   * @param radius
+   */
+  void setRadius(int radius);
+  QRectF boundingRect() const override;
+  QPainterPath shape() const override;
+
+private:
+  int radius = 20;
+  QVector<QPointF> wu;
+};
+
 #endif

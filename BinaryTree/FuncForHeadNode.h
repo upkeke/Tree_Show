@@ -3,11 +3,12 @@
 #ifndef __FUNCFORTREESTR__
 #define __FUNCFORTREESTR__
 
-#include <QStrNode.hpp>
 #include <QPointF>
+#include <QStrNode.hpp>
 #include <QString>
 #include <concepts>
 #include <string>
+
 namespace sbt {
 
 QPointF operator*(const PosStrNode &ps, const QPointF &pt);
@@ -50,7 +51,7 @@ template <str_able T> std::string val_to_string(const T &val) {
     if constexpr (std::is_same_v<bool, T>) {
       return val ? "true" : "false";
     } else if constexpr (std::is_same_v<char, T>) {
-      return string(1, val);
+      return std::string(1, val);
     } else {
       return std::to_string(val);
     }
@@ -148,25 +149,28 @@ void foreach_back(NodePtr head, Func func, Args &&...args) {
     sk.pop();
   }
 }
+
 /**
  * @brief 调整节点的横坐标。使用场景坐标
  *
  * @param head
  */
-void update_row(NodePtr head);
+void update_row(NodePtr head, int base_row = 0);
+void update_row(NodePtr head, const QPointF &offset, int base_row = 0);
 /**
  * @brief 调整节点的纵坐标。使用场景坐标
  *
  * @param head
  */
-void update_col(NodePtr head, const QPointF &offset);
+void update_col(NodePtr head, int base_col = 0);
+void update_col(NodePtr head, const QPointF &offset, int base_col = 0);
 /**
  * @brief 调整横纵坐标
  *
  * @param head
  * @param offset
  */
-void update_xy(NodePtr head, const QPointF &offset);
+void update_xy(NodePtr head, const QPointF &offset = QPointF{0, 0});
 } // namespace sbt
 
 #endif

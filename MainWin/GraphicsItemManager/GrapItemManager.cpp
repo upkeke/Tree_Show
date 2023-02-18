@@ -1,15 +1,14 @@
 ﻿#include "GrapItemManager.h"
 #include "GrapLineItem.h"
-#include "GrapMoveItem.h"
+// #include "GrapMoveItem.h"
 #include "GrapNodeItem.h"
-#include <BinaryTreeStr.hpp>
+// #include <BinaryTreeStr.hpp>
 #include <FuncForHeadNode.h>
+#include <HeadNode.h>
 #include <QGraphicsScene>
 
 using namespace sbt;
-GrapItemManager::GrapItemManager(QGraphicsScene *scene)
-    : grapNodePool(), curNodeindex(0), grapLinePool(), curLineIndex(0),
-      scene(scene) {}
+GrapItemManager::GrapItemManager(QGraphicsScene *scene) : scene(scene) {}
 
 std::shared_ptr<GrapItemManager>
 GrapItemManager::instance(QGraphicsScene *scene) {
@@ -18,30 +17,100 @@ GrapItemManager::instance(QGraphicsScene *scene) {
   }
   return ItemManager;
 }
-GrapNodeItem *GrapItemManager::getGrapNode(NodePtr nodeptr, bool &isNew,
-                                           QGraphicsItemGroup *grp) {
-  auto temp = grapNodePool.size();
+QGraphicsScene *GrapItemManager::getScene() { return scene; }
+/**
+ * @brief
+ *
+ 三种情况
+ 1，外界构造好node ，传来一个nodeptr竟来只用
+ 1.1 如果有剩余的GrapNodeItem，直接reset它的nodptr
+ 1.2，没有剩余的GrapNodeItem，需要new一个GrapNodeItem
+
+ 2 外界传入构造node的参数，内部有剩余的GrapNodeItem，里面的node也还保留，
+ * @param nodeptr
+ * @param isNew
+ * @return GrapNodeItem*
+ */
+GrapNodeItem *GrapItemManager::getGrapNode(sbt::NodePtr nodeptr, bool &isNew,
+                                           sbt::NodePtr headptr) {
   GrapNodeItem *item = nullptr;
-  if (curNodeindex == temp) {
-    item = new GrapNodeItem(nodeptr);
+  if (freeNodePool.empty()) {
+    item = new GrapNodeItem(nodeptr, headptr);
+    nodeToGrapNode[nodeptr] = item;
     scene->addItem(item);
-    grapNodePool.push_back(item);
     isNew = true;
   } else {
-    item = grapNodePool[curNodeindex];
-    item->reSet(nodeptr);
+    item = freeNodePool.top();
+    freeNodePool.pop();
+    // item->reSet(nodeptr); // item原本含有的nodeptr内存泄漏
+    item->reSet(nodeptr, headptr);
     isNew = false;
   }
-  grp->addToGroup(item);
-  nodeToGrapNode[nodeptr] = item;
-  curNodeindex++;
   item->show();
-  item->clearLines();
   return item;
 }
+//delete
+void GrapItemManager::deleteTree(GrapNodeItem *headGrapItem) {
+
+  // headGrapItem->hide();
+  // freeNodePool.push(headGrapItem);
+  sbt::foreach_back(
+      headGrapItem->getHeadPtr(),
+      [](NodePtr cur, GrapItemManager *self) {
+        auto item = self->nodeToGrapNode[cur];
+        item->hide();
+        self->freeNodePool.push(item);
+        auto lines = item->reMoveLines();
+        // 将直线还给管理器
+        for (auto i : lines) {
+          if (i != nullptr) {
+            i->hide();
+            self->freeLinePool.push(i);
+          }
+        }
+        delete cur;
+      },
+      this);
+}
+void GrapItemManager::mergeTree(GrapNodeItem *main_item,
+                                GrapNodeItem *sub_item) {
+  auto base_node = main_item->getNodePtr();
+  auto new_node = sub_item->getNodePtr();
+  // 如果base_node可插入
+  if (base_node->left == nullptr || base_node->right == nullptr) {
+    bool isLeft = true;
+    // 左子树可插入且插入节点的位置位于根节点的左边
+    // 可能存在一种情况，base_item的左子树不为空，右子树为空，能进入这儿
+    // 但是如果当前节点是在base_item的左边，那么不能连接二者，直接return
+    if (sub_item->pos().x() <= main_item->pos().x()) {
+      auto bs_tp = base_node->left;
+      if (bs_tp == nullptr) {
+        ;
+      } else {
+        return;
+      }
+    } else {
+      auto bs_tp = base_node->right;
+      if (bs_tp == nullptr) {
+        isLeft = false;
+      } else {
+        return;
+      }
+    }
+    sbt::insert_node(new_node, base_node, isLeft);
+    qDebug() << "我碰到了可插入节点" << main_item->strVal();
+    //  插入后，将它和它的子图元的设置重设父节点
+    this->reSetTreeNodeItemHead(sub_item, main_item->getHeadPtr());
+    this->getGrapLine(main_item, sub_item, isLeft);
+  }
+}
 void GrapItemManager::ShowDepthOrVal(bool flag) {
-  for (int i = 0; i < curNodeindex; ++i) {
-    grapNodePool[i]->SetIsShowDepth(flag);
+  auto items = scene->items();
+  for (auto item : items) {
+    auto x = qgraphicsitem_cast<GrapNodeItem *>(item);
+    if (x != nullptr) {
+      x->SetIsShowDepth(flag);
+    }
   }
 }
 GrapNodeItem *GrapItemManager::whereGrapNode(NodePtr nodeptr) {
@@ -50,19 +119,18 @@ GrapNodeItem *GrapItemManager::whereGrapNode(NodePtr nodeptr) {
   }
   return nullptr;
 }
-std::pair<sbt::BinaryTreeStr *, QGraphicsItemGroup *>
-GrapItemManager::treeWithItemGroup(sbt::BinaryTreeStr *tree,
-                                   QGraphicsItemGroup *grp) {
+
+void GrapItemManager::reSetTreeNodeItemHead(GrapNodeItem *treeItem,
+                                            NodePtr headPtr) {
+  treeItem->setHeadPtr(headPtr);
   sbt::foreach_front(
-      tree->get_head(),
-      [](NodePtr cur, unordered_map<sbt::NodePtr, GrapNodeItem *> &mp,
-         QGraphicsItemGroup *gp) {
+      headPtr,
+      [headPtr](NodePtr cur, unordered_map<sbt::NodePtr, GrapNodeItem *> &mp) {
         if (mp.contains(cur)) {
-          gp->addToGroup(mp[cur]);
+          mp[cur]->setHeadPtr(headPtr);
         }
       },
-      this->nodeToGrapNode, grp);
-  return {};
+      this->nodeToGrapNode);
 }
 /**
  * @brief
@@ -72,9 +140,10 @@ GrapItemManager::treeWithItemGroup(sbt::BinaryTreeStr *tree,
  * @param head
  * @param offset
  */
-void GrapItemManager::updateGrapNodePos(sbt::NodePtr head,
-                                        const QPointF &offset) {
-
+void GrapItemManager::updateGrapNodePos(sbt::NodePtr head) {
+  QPointF offset = head->getOffsetByNowPos();
+  qDebug() << "刷新节点位置 头节点是 " << head->val;
+  qDebug() << "偏移值是 " << offset;
   int row = 0;
   sbt::foreach_mid(
       head,
@@ -87,7 +156,7 @@ void GrapItemManager::updateGrapNodePos(sbt::NodePtr head,
       },
       offset, nodeToGrapNode, row);
 }
-void GrapItemManager::LineNodeToChild(GrapNodeItem * fatherItem) {
+void GrapItemManager::LineNodeToChild(GrapNodeItem *fatherItem) {
   auto fatherNode = fatherItem->getNodePtr();
   for (size_t j = 0; j < 2; ++j) {
     NodePtr childNode = nullptr;
@@ -98,72 +167,48 @@ void GrapItemManager::LineNodeToChild(GrapNodeItem * fatherItem) {
     if (childNode != nullptr) {
       // 后序遍历，子节点图元必然先于父节点创建，可以不判断nodeToGrapNode[childNode]
       auto childItem = nodeToGrapNode[childNode];
-      GrapLineItem *curLineItem = getGrapLine(fatherItem,childItem,j == 0);
+      GrapLineItem *curLineItem = getGrapLine(fatherItem, childItem, j == 0);
     }
   }
 }
 GrapLineItem *GrapItemManager::getGrapLine(GrapNodeItem *front,
-                                           GrapNodeItem *end) {
-
-  auto temp = grapLinePool.size();
-  GrapLineItem *item = nullptr;
-  if (curLineIndex == temp) {
-    item = new GrapLineItem(front, end);
-    scene->addItem(item);
-    grapLinePool.push_back(item);
-  } else {
-    item = grapLinePool[curLineIndex];
-    item->setTwo(front, end);
-  }
-  curLineIndex++;
-  item->show();
-  // 由于直线与2个图元连接，把直线添加到2个图元中
-  front->addLine(item);
-  end->addLine(item);
-  return item;
-}
-GrapLineItem *GrapItemManager::getGrapLine(GrapNodeItem *front,
                                            GrapNodeItem *end, bool isleft) {
-  GrapLineItem *re = getGrapLine(front, end);
-  re->setIsLeftLine(isleft);
+  GrapLineItem *re = nullptr; // getGrapLine(front, end);
+  if (!freeLinePool.empty()) {
+    re = freeLinePool.top();
+    freeLinePool.pop();
+    re->setTwo(front, end, isleft);
+  } else {
+    re = new GrapLineItem(front, end, isleft);
+    scene->addItem(re);
+  }
+  re->show();
   return re;
 }
-void GrapItemManager::hideSurplus() {
-  for (size_t i = curNodeindex; i < grapNodePool.size(); ++i) {
-    grapNodePool[i]->hide();
-    nodeToGrapNode.erase(grapNodePool[i]->nodeptr);
-  }
-  for (size_t i = curLineIndex; i < grapLinePool.size(); ++i) {
-    grapLinePool[i]->hide();
-  }
-  scene->update();
+void GrapItemManager::removeLine(GrapLineItem *line) {
+  line->hide();
+  freeLinePool.push(line);
 }
+void GrapItemManager::disconnectGrapNode(GrapNodeItem *father,
+                                         GrapNodeItem *child) {
 
-void GrapItemManager::hideNodes(NodePtr head) {
-  sbt::foreach_front(
-      head,
-      [](NodePtr cur,
-         unordered_map<sbt::NodePtr, GrapNodeItem *> &_nodeToGrapNode) {
-        _nodeToGrapNode[cur]->hide();
-        _nodeToGrapNode[cur]->reMoveLines();
-        _nodeToGrapNode.erase(cur);
-      },
-      nodeToGrapNode);
-  scene->update();
-}
-
-GrapMoveItem *GrapItemManager::getGrapMove(const QPointF &pos) {
-  auto temp = grapMovePool.size();
-  GrapMoveItem *item = nullptr;
-  if (curLineIndex == temp) {
-    item = new GrapMoveItem(pos);
-    scene->addItem(item);
-    grapMovePool.push_back(item);
-  } else {
-    item = grapMovePool[curMoveIndex];
+  auto fatherPtr = father->getNodePtr();
+  auto childPtr = child->getNodePtr();
+  // 将父节点和自己断开
+  if (fatherPtr != nullptr) {
+    qDebug() << "父节点是 " << fatherPtr->val;
+    bool isLeft = (fatherPtr->left == childPtr);
+    if (isLeft) {
+      fatherPtr->left = nullptr;
+    } else {
+      fatherPtr->right = nullptr;
+    }
+    auto line = father->rmoveLine(isLeft);
+    child->setFatherItem(nullptr);
+    this->removeLine(line);
+    // 更新所有子树图元的根节点
+    this->reSetTreeNodeItemHead(child, childPtr);
+    sbt::update_col(childPtr);
   }
-  curMoveIndex++;
-  item->show();
-  return item;
 }
 GrapItemManager::~GrapItemManager() {}

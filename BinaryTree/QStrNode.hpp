@@ -61,12 +61,7 @@ struct PosStrNode {
   int row = 0;
   int col = 0;
   NodeColor color = NodeColor::yellow;
-  /**
-   * @brief 避免头节点和其他树的叶子进行碰撞检测
-   * 
-   */
-  PosStrNode *head = nullptr;
-  bool isHead = false;
+  //bool isHead = false;
 
 private:
   /**

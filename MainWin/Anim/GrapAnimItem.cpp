@@ -1,4 +1,4 @@
-﻿#include "GrapUi.h"
+﻿#include "GrapAnimItem.h"
 #include <QFontDatabase>
 #include <QGraphicsScene>
 #include <QGraphicsSceneMouseEvent>
@@ -31,21 +31,7 @@ QString OrderQStr(const EechOrder &order) {
 }
 
 } // namespace
-// UiForeachBtn::UiForeachBtn(QGraphicsItem *parent) {
-//   pix.load(":m/res/img/遍历完整加明.png");
-//   pix.scaledToHeight(40);
-//   // 下拉列表的根btn
-//   writeArea =
-//       QRectF(QPointF(-pix.width() / 2.0 + 40, -pix.height() / 2.0),
-//       pix.size());
-//   this->order = EechOrder::选择;
 
-//   int fontId =
-//   QFontDatabase::addApplicationFont(":/p/res/font/XiaoKeNa.ttf"); QString
-//   fontFamily = QFontDatabase::applicationFontFamilies(fontId).at(0);
-//   font.setFamily(fontFamily);
-//   font.setPointSize(50);
-// }
 UiForeachBtn::UiForeachBtn(EechOrder order) {
   setZValue(2);
   pix.load(":/GrapUi/img/遍历空-明.png");
@@ -109,7 +95,7 @@ void UiForeachRootBtn::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event) {
   if (event->button() == Qt::LeftButton) {
     qDebug() << "左键双击";
     // QPointF pos = this->mapToScene(boundingRect().bottomRight());
-    emit RootBtnPress(this);
+    emit RootBtnPress();
   }
 }
 bool UiForeachRootBtn::IsOpen() { return isOpen; }
@@ -123,5 +109,63 @@ void UiForeachRootBtn::set_order(EechOrder order) {
 --------------------------------------------------------------
 --------------------------------------------------------------
 */
+#include <QGraphicsSceneContextMenuEvent>
+#include <QMenu>
 
-UiBuildClearBtn::UiBuildClearBtn() : QObject(nullptr), QGraphicsItem(nullptr) {}
+namespace {
+
+QVector<QPointF> getPoints(qreal r) {
+  qreal rprime = r * sin(18 * M_PI / 180) / sin(126 * M_PI / 180);
+  QPointF A{r * cos(18 * M_PI / 180), r * sin(18 * M_PI / 180)};
+  QPointF B{r * cos(90 * M_PI / 180), r * sin(90 * M_PI / 180)};
+  QPointF C{r * cos(162 * M_PI / 180), r * sin(162 * M_PI / 180)};
+  QPointF D{r * cos(234 * M_PI / 180), r * sin(234 * M_PI / 180)};
+  QPointF E{r * cos(306 * M_PI / 180), r * sin(306 * M_PI / 180)};
+  QPointF F{rprime * cos(54 * M_PI / 180), rprime * sin(54 * M_PI / 180)};
+  QPointF G{rprime * cos(126 * M_PI / 180), rprime * sin(126 * M_PI / 180)};
+  QPointF H{rprime * cos(198 * M_PI / 180), rprime * sin(198 * M_PI / 180)};
+  QPointF I{rprime * cos(270 * M_PI / 180), rprime * sin(272 * M_PI / 180)};
+  QPointF J{rprime * cos(342 * M_PI / 180), rprime * sin(342 * M_PI / 180)};
+  QVector<QPointF> points{B, F, A, J, E, I, D, H, C, G};
+  return points;
+}
+_SPC vector<QPointF> getPentagonPoints(qreal radius) {
+  _SPC vector<QPointF> points;
+  for (int i = 0; i < 5; ++i) {
+    qreal angle = 2 * M_PI / 5 * i;
+    QPointF(QPointF(radius * cos(angle), radius * sin(angle)));
+  }
+  return points;
+}
+} // namespace
+
+GrapMoveItem::GrapMoveItem(QPointF mPos, QGraphicsItem *parent)
+    : QGraphicsItem(parent), wu(::getPoints(radius)) {
+  setPos(mPos);
+  setZValue(1);
+}
+void GrapMoveItem::paint(QPainter *painter,
+                         const QStyleOptionGraphicsItem *option,
+                         QWidget *widget) {
+  painter->setBrush(Qt::red);
+  painter->setPen(Qt::black);
+  painter->drawPolygon(wu.data(), 10); // 画五角星
+}
+QRectF GrapMoveItem::boundingRect() const {
+  return QRectF(QPointF(-radius, -radius), QSizeF(radius * 2, radius * 2));
+}
+QPainterPath GrapMoveItem::shape() const {
+  QPainterPath path;
+  path.addPolygon(wu);
+  return path;
+}
+void GrapMoveItem::setRadius(int radius) {
+  this->radius = radius;
+  wu = getPoints(radius);
+}
+void GrapMoveItem::contextMenuEvent(QGraphicsSceneContextMenuEvent *event) {
+  QMenu menu;
+  menu.addAction("Action 1");
+  menu.addAction("Action 2");
+  menu.exec(event->screenPos());
+}

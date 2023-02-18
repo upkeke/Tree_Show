@@ -4,7 +4,7 @@ set(${PROJECT_NAME}_SRC
     GrapNodeItem.cpp
     GrapLineItem.cpp
     GrapItemManager.cpp
-    GrapMoveItem.cpp
+   # GrapMoveItem.cpp
 )
 add_library(${PROJECT_NAME} SHARED ${${PROJECT_NAME}_SRC})
 target_compile_definitions(${PROJECT_NAME} 
@@ -15,7 +15,7 @@ target_link_libraries(${PROJECT_NAME}
     PUBLIC
     Qt6::Widgets
     Qt6::Core
-    FuncForHeadNode
+    HeadNode
 )
 target_include_directories(${PROJECT_NAME}
     PUBLIC

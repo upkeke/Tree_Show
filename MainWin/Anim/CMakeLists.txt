@@ -2,6 +2,7 @@
 
 set(${PROJECT_NAME}_SRC 
     AnimManager.cpp
+    GrapAnimItem.cpp
 )
 
 
@@ -9,14 +10,14 @@ set(${PROJECT_NAME}_SRC
 add_library(AnimManager SHARED ${${PROJECT_NAME}_SRC})
 target_compile_definitions(${PROJECT_NAME} 
     PRIVATE
-    ANIM_LIB_CCXX
+    ANIM_LIB_X
 )
 target_link_libraries(${PROJECT_NAME} 
     PUBLIC
     Qt6::Widgets
     Qt6::Core
     GrapItemManager
-    GrapUiManager
+    HeadNode
 )
 
 target_include_directories(${PROJECT_NAME}
