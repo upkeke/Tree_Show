@@ -4,12 +4,12 @@
 MainWin/弃用
 MainWin/test
 BinaryTree/弃用
+BinaryTree/container
 *.png
 *.psd
 *.jpg
-lib
-bin
 data
-
+记录表.md
+问题记录.md
 
 //.gitignore

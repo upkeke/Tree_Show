@@ -21,7 +21,6 @@ set(CMAKE_AUTOMOC ON)
 include_directories(
     ${CMAKE_CURRENT_LIST_DIR}
     ${CMAKE_CURRENT_LIST_DIR}/BinaryTree
-    ${CMAKE_CURRENT_LIST_DIR}/BinaryTree/container
 )
 
 find_package(Qt6 REQUIRED COMPONENTS Core Widgets)
@@ -31,7 +30,6 @@ if(MSVC)
     set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
 endif()
 
-#message("Qt6Widgets_INCLUDE_DIRS >> ${Qt6Widgets_INCLUDE_DIRS}")
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/bin)
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/lib)
 

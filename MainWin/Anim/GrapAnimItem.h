@@ -29,7 +29,6 @@ class ANIM_LIB_EXPORT UiForeachBtn : public QObject, public QGraphicsItem {
   Q_INTERFACES(QGraphicsItem)
   Q_PROPERTY(QPointF pos READ pos WRITE setPos)
 public:
-  // UiForeachBtn(QGraphicsItem *parent = nullptr);
   UiForeachBtn(EechOrder order);
   void paint(QPainter *painter, const QStyleOptionGraphicsItem *option,
              QWidget *widget) override;
@@ -76,22 +75,6 @@ signals:
 private:
   // 子列表是否被展开
   bool isOpen = false;
-};
-/*------------------------------------------------------------
---------------------------------------------------------------
---------------------------------------------------------------
-*/
-
-/**
- * @brief 这个是生成按钮,清理按钮
- 点击后会建立二叉树，再次点击会清空二叉树
- *
- */
-class ANIM_LIB_EXPORT UiBuildClearBtn : public QObject, public QGraphicsItem {
-  Q_OBJECT
-  Q_INTERFACES(QGraphicsItem)
-public:
-  UiBuildClearBtn();
 };
 
 /*------------------------------------------------------------

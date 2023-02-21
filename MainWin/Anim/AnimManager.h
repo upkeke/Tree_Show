@@ -14,10 +14,6 @@
 #include <memory>
 #include <vector>
 
-// inline qreal disBtwItem(const QPointF &p1, const QPointF &p2) {
-//   auto p = p1 - p2;
-//   return std::sqrt(p.rx() * p.rx() + p.y() * p.y());
-// }
 class QParallelAnimationGroup;
 class QPropertyAnimation;
 class UiForeachBtn;

@@ -1,6 +1,6 @@
 ﻿#include "GrapNodeItem.h"
+#include "GrapItemManager.h"
 #include "GrapLineItem.h"
-
 #include <QDebug>
 #include <QDialog>
 #include <QGraphicsScene>
@@ -21,26 +21,37 @@ GrapNodeItem::GrapNodeItem(NodePtr nodePtr, NodePtr headPtr,
   val = nodePtr->val;
   setZValue(0);
   setPos(nodePtr->Pos());
+  this->headPtr = headPtr;
   initMenu();
-  setHeadPtr(headPtr);
+}
+void GrapNodeItem::init_static_mem(GrapItemManager *_manager) {
+  GrapNodeItem::manager = _manager;
 }
 void GrapNodeItem::initMenu() {
   menu = new QMenu();
 
   auto a0 = menu->addAction("变成主角");
   actions[0] = a0;
-  connect(a0, &QAction::triggered, [this]() { emit beStar(nodePtr); });
+  connect(a0, &QAction::triggered, manager,
+          [this]() { manager->set_main_tree(this); });
   // 如果截断成功，当前节点会变成头节点
   auto a1 = menu->addAction("截断二叉树");
   actions[1] = a1;
-  connect(a1, &QAction::triggered, [this]() { emit truncateCurTree(this); });
+  connect(a1, &QAction::triggered, manager,
+          [this]() { manager->truncate_tree(this); });
   auto a2 = menu->addAction("设置值");
   actions[2] = a2;
-  connect(a2, &QAction::triggered, [this]() { emit changeVal(nodePtr); });
+  connect(a2, &QAction::triggered, manager,
+          [this]() { manager->changeNodeVal(this); });
   auto a3 = menu->addAction("删除");
   actions[3] = a3;
-  connect(a3, &QAction::triggered, [this]() { emit deleteNodeItem(this); });
+  connect(a3, &QAction::triggered, manager,
+          [this]() { manager->deleteTree(this); });
   menu->addActions(actions);
+  updateActions();
+
+  connect(this, &GrapNodeItem::mergeToOther, manager,
+          &GrapItemManager::mergeTree);
 }
 
 void GrapNodeItem::paint(QPainter *painter,
@@ -141,6 +152,9 @@ void GrapNodeItem::SetIsShowDepth(bool flag) { this->isShowDepth = flag; }
 GrapNodeItem::~GrapNodeItem() { delete menu; }
 void GrapNodeItem::setHeadPtr(sbt::NodePtr head) {
   this->headPtr = head;
+  updateActions();
+}
+void GrapNodeItem::updateActions() {
   auto isHead = isHeadItem();
   actions[0]->setVisible(isHead);
   actions[1]->setVisible(!isHead);
@@ -149,6 +163,7 @@ void GrapNodeItem::setHeadPtr(sbt::NodePtr head) {
   else
     nodePtr->color = NodeColor::yellow;
 }
+
 sbt::NodePtr GrapNodeItem::getHeadPtr() { return headPtr; }
 void GrapNodeItem::reSet(sbt::NodePtr nodeptr, sbt::NodePtr headPtr) {
   this->nodePtr = nodeptr;

@@ -1,7 +1,7 @@
 ﻿
 project(BinaryTree)
 
-add_subdirectory(container)
+#add_subdirectory(container)
 
 find_package(Qt6 REQUIRED Sql Widgets Core)
 

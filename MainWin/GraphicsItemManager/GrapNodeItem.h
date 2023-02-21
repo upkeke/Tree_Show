@@ -11,6 +11,7 @@ class GrapLineItem;
 #include <QPen>
 #include <QStrNode.hpp>
 #include <config.h>
+class GrapItemManager;
 class QAction;
 class GRAP_LIB_EXPORT GrapNodeItem : public QObject, public QGraphicsItem {
   Q_OBJECT
@@ -32,6 +33,7 @@ public:
    */
   // void reSet(sbt::NodePtr nodeptr);
   sbt::NodePtr getNodePtr();
+  // void build_connect(GrapItemManager *manager);
   void setVal(const QString &num);
   QString strVal() { return val; }
   /**
@@ -76,6 +78,7 @@ public:
   void SetIsShowDepth(bool flag);
   bool isHeadItem() { return nodePtr == headPtr; }
   void setHeadPtr(sbt::NodePtr head);
+  void updateActions();
   sbt::NodePtr getHeadPtr();
   /**
    * @brief 不会构造menu，
@@ -95,28 +98,6 @@ signals:
    */
   void mergeToOther(GrapNodeItem *main, GrapNodeItem *sub);
 
-  // void updateTreePos(sbt::NodePtr head, const QPointF &offset);
-
-  /**
-   * @brief 截断二叉树，当前选中节点作为新的树的根节点
-   *
-   */
-  void truncateCurTree(GrapNodeItem *headItem);
-  /**
-   * @brief 修改节点的值
-   *
-   * @param node
-   */
-  void changeVal(sbt::NodePtr node);
-  /**
-   * @brief 作为主树，场景中可能有很多树，当前这个被作为被遍历的树
-   *
-   * @param node
-   */
-  void beStar(sbt::NodePtr node);
-  // void addChildNode(bool isLeft, sbt::NodePtr node);
-  void deleteNodeItem(GrapNodeItem *headItem);
-
 private:
   /**
    * @brief 禁止外界构造，只能通过GrapItemManager构造
@@ -125,6 +106,7 @@ private:
    * @param parent
    */
   explicit GrapNodeItem(sbt::NodePtr nodeptr, sbt::NodePtr headPtr,
+
                         QGraphicsItem *parent = nullptr);
   void initMenu();
   // 只管理和子节点的直线，不管理和父节点的直线，0为左子节点，1为右子节点
@@ -150,5 +132,11 @@ private:
 
 public:
   sbt::NodePtr nodePtr = nullptr;
+
+private:
+  inline static GrapItemManager *manager = nullptr;
+
+public:
+  static void init_static_mem(GrapItemManager *_manager);
 };
 #endif

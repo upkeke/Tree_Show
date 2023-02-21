@@ -10,22 +10,11 @@ namespace Ui {
 class BinaryTreeWin;
 }
 QT_END_NAMESPACE
-#include "GrapItemManager.h"
+#include<GrapItemManager.h>
 #include <AnimManager.h>
-// #include <BinaryTreeStr.hpp>
-// #include <GrapUiManager.h>
 #include <HeadNode.h>
 #include <QStrNode.hpp>
 
-class QGraphicsScene;
-class QPointF;
-class GrapNodeItem;
-class QGraphicsLineItem;
-class GrapLineItem;
-class QGraphicsItem;
-class GrapMoveItem;
-class QParallelAnimationGroup;
-class QPropertyAnimation;
 class ThScene;
 class SettingWin;
 enum class EechOrder;
@@ -42,7 +31,6 @@ public:
     this->curtree->color = sbt::NodeColor::magenta;
     this->trees.insert(curtree);
   }
-  void test1();
   ~MainWin();
 signals:
   void sendHeadnode(sbt::NodePtr tree);
@@ -59,8 +47,6 @@ private:
   _SPC vector<sbt::NodePtr> getListByOrder(EechOrder order);
   Ui::BinaryTreeWin *ui = nullptr;
 
-  //_SPC vector<sbt::NodePtr> cur_nodeptr_list;
-  // sbt::BinaryTreeStr *curtree = nullptr;
   sbt::NodePtr curtree = nullptr;
   // 每颗树的所有节点图元都保存在一个中,为了快速删除
   std::unordered_set<sbt::NodePtr> trees{};
@@ -88,13 +74,7 @@ public slots:
    * @param headptr
    */
   void add_new_tree(sbt::NodePtr headptr);
-  void changeNodeVal(sbt::NodePtr node);
-  /**
-   * @brief 头节点是node的树是主树
-   *head
-   * @param node
-   */
-  void be_main_tree(sbt::NodePtr node);
+  //void changeNodeVal(sbt::NodePtr node);
 
 };
 

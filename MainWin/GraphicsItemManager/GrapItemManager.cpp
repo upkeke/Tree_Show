@@ -1,19 +1,26 @@
 ﻿#include "GrapItemManager.h"
 #include "GrapLineItem.h"
-// #include "GrapMoveItem.h"
 #include "GrapNodeItem.h"
-// #include <BinaryTreeStr.hpp>
 #include <FuncForHeadNode.h>
 #include <HeadNode.h>
 #include <QGraphicsScene>
 
 using namespace sbt;
-GrapItemManager::GrapItemManager(QGraphicsScene *scene) : scene(scene) {}
+GrapItemManager::GrapItemManager(QGraphicsScene *scene,
+                                 std::unordered_set<sbt::NodePtr> &trees,
+                                 sbt::NodePtr &curtree)
+    : scene(scene), trees(trees), curtree(curtree) {
+
+  GrapNodeItem::init_static_mem(this);
+}
 
 std::shared_ptr<GrapItemManager>
-GrapItemManager::instance(QGraphicsScene *scene) {
+GrapItemManager::instance(QGraphicsScene *scene,
+                          std::unordered_set<sbt::NodePtr> &trees,
+                          sbt::NodePtr &curtree) {
   if (ItemManager == nullptr) {
-    ItemManager = std::shared_ptr<GrapItemManager>(new GrapItemManager(scene));
+    ItemManager = std::shared_ptr<GrapItemManager>(
+        new GrapItemManager(scene, trees, curtree));
   }
   return ItemManager;
 }
@@ -42,38 +49,18 @@ GrapNodeItem *GrapItemManager::getGrapNode(sbt::NodePtr nodeptr, bool &isNew,
   } else {
     item = freeNodePool.top();
     freeNodePool.pop();
-    // item->reSet(nodeptr); // item原本含有的nodeptr内存泄漏
     item->reSet(nodeptr, headptr);
     isNew = false;
   }
+
   item->show();
   return item;
 }
-//delete
-void GrapItemManager::deleteTree(GrapNodeItem *headGrapItem) {
 
-  // headGrapItem->hide();
-  // freeNodePool.push(headGrapItem);
-  sbt::foreach_back(
-      headGrapItem->getHeadPtr(),
-      [](NodePtr cur, GrapItemManager *self) {
-        auto item = self->nodeToGrapNode[cur];
-        item->hide();
-        self->freeNodePool.push(item);
-        auto lines = item->reMoveLines();
-        // 将直线还给管理器
-        for (auto i : lines) {
-          if (i != nullptr) {
-            i->hide();
-            self->freeLinePool.push(i);
-          }
-        }
-        delete cur;
-      },
-      this);
-}
 void GrapItemManager::mergeTree(GrapNodeItem *main_item,
                                 GrapNodeItem *sub_item) {
+  trees.erase(sub_item->getNodePtr());
+
   auto base_node = main_item->getNodePtr();
   auto new_node = sub_item->getNodePtr();
   // 如果base_node可插入
@@ -189,8 +176,7 @@ void GrapItemManager::removeLine(GrapLineItem *line) {
   line->hide();
   freeLinePool.push(line);
 }
-void GrapItemManager::disconnectGrapNode(GrapNodeItem *father,
-                                         GrapNodeItem *child) {
+void GrapItemManager::removeLine(GrapNodeItem *father, GrapNodeItem *child) {
 
   auto fatherPtr = father->getNodePtr();
   auto childPtr = child->getNodePtr();
@@ -206,9 +192,69 @@ void GrapItemManager::disconnectGrapNode(GrapNodeItem *father,
     auto line = father->rmoveLine(isLeft);
     child->setFatherItem(nullptr);
     this->removeLine(line);
-    // 更新所有子树图元的根节点
-    this->reSetTreeNodeItemHead(child, childPtr);
-    sbt::update_col(childPtr);
   }
 }
+void GrapItemManager::disconnectGrapNode(GrapNodeItem *father,
+                                         GrapNodeItem *child) {
+  removeLine(father, child); // 更新所有子树图元的根节点
+  auto childPtr = child->getNodePtr();
+  this->reSetTreeNodeItemHead(child, childPtr);
+  sbt::update_col(childPtr);
+}
 GrapItemManager::~GrapItemManager() {}
+/*------------------------------------------------------------
+--------------------------------------------------------------
+slots  slots  slots  slots  slots  slots  slots  slots  slots
+--------------------------------------------------------------
+--------------------------------------------------------------
+*/
+
+void GrapItemManager::set_main_tree(GrapNodeItem *tree) {
+  curtree = tree->nodePtr;
+  curtree->color = sbt::NodeColor::magenta;
+  scene->update();
+}
+void GrapItemManager::truncate_tree(GrapNodeItem *curItem) {
+  this->disconnectGrapNode(curItem->getFatherItem(), curItem);
+  // 加入到集合中
+  trees.insert(curItem->getNodePtr());
+  scene->update();
+}
+#include <QInputDialog>
+#include <QLineEdit>
+void GrapItemManager::changeNodeVal(GrapNodeItem *curitem) {
+  auto node = curitem->getNodePtr();
+  bool ok;
+  QString text = QInputDialog::getText(static_cast<QWidget *>(scene->parent()),
+                                       tr("Enter text"), tr("Text:"),
+                                       QLineEdit::Normal, QString(), &ok);
+  if (ok && !text.isEmpty()) {
+    node->val = text;
+  }
+  scene->update();
+}
+// delete
+void GrapItemManager::deleteTree(GrapNodeItem *headGrapItem) {
+  if (headGrapItem->isHeadItem())
+    trees.erase(headGrapItem->getNodePtr());
+  else
+    this->removeLine(headGrapItem->getFatherItem(), headGrapItem);
+  sbt::foreach_back(
+      headGrapItem->getNodePtr(),
+      [](NodePtr cur, GrapItemManager *self) {
+        auto item = self->nodeToGrapNode[cur];
+        item->hide();
+        self->freeNodePool.push(item);
+        auto lines = item->reMoveLines();
+        // 将直线还给管理器
+        for (auto i : lines) {
+          if (i != nullptr) {
+            i->hide();
+            self->freeLinePool.push(i);
+          }
+        }
+        delete cur;
+      },
+      this);
+  scene->update();
+}

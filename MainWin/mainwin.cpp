@@ -24,73 +24,45 @@ MainWin::MainWin(QWidget *parent)
     : QMainWindow(parent), ui(new Ui::BinaryTreeWin) {
   ui->setupUi(this);
   scene = new ThScene(this);
-  ui->view->setScene(scene); // QGraphicsView
+  ui->view->setScene(scene);
   ui->view->show();
 
   init_pool();
   // 设置窗口
   setWin = new SettingWin();
   setWin->hide();
-
+  // 建立二叉树
   connect(ui->actionbuild, &QAction::triggered, this, &MainWin::action_build);
+  // 调整二叉树的每个节点的位置
   connect(ui->actrefresh, &QAction::triggered, this, [this]() {
     for (auto head : trees) {
-
       this->grapPool->updateGrapNodePos(head);
-      scene->update();
-      // this->action_refresh_pos(head);
     }
+    scene->update();
   });
+  // 添加节点
   connect(ui->actionadd, &QAction::triggered, this, &MainWin::action_add_node);
+  // 显示叶子
   connect(ui->actionleaf, &QAction::triggered, this, &MainWin::action_leave);
+  // 显示深度
   connect(ui->actiondepth, &QAction::triggered, this, &MainWin::action_depth);
-  connect(ui->actionset, &QAction::triggered, this,
-          [this]() { setWin->show(); });
+  // 显示设置按钮
+  connect(ui->actionset, &QAction::triggered, setWin, &SettingWin::show);
 
   // action_leave
   connect(setWin, &SettingWin::buildTree, this, &MainWin::add_new_tree);
 }
 void MainWin::init_pool() {
-  grapPool = GrapItemManager::instance(scene);
+  grapPool = GrapItemManager::instance(scene, trees, curtree);
   animPool = AnimManager::instance(grapPool);
   animPool->setHeadNode(&curtree);
-}
-void MainWin::deleteTree(sbt::NodePtr tree) {
-  sbt::delete_tree(tree);
-  trees.erase(tree);
 }
 
 MainWin::~MainWin() {
   delete ui;
-  delete curtree;
-}
-
-void MainWin::NodeItemConnect(GrapNodeItem *headItem) {
-  // 分裂成一颗新树
-  connect(headItem, &GrapNodeItem::truncateCurTree, this,
-          [this](GrapNodeItem *curItem) {
-            grapPool->disconnectGrapNode(curItem->getFatherItem(), curItem);
-            // 加入到集合中
-            trees.insert(curItem->getNodePtr());
-            scene->update();
-          });
-  // 修改值
-  connect(headItem, &GrapNodeItem::changeVal, this, &MainWin::changeNodeVal);
-  connect(headItem, &GrapNodeItem::deleteNodeItem, this,
-          [this](GrapNodeItem *headItem) {
-            grapPool->deleteTree(headItem);
-            trees.erase(headItem->getNodePtr());
-          });
-  headNodeItemConnect(headItem);
-}
-void MainWin::headNodeItemConnect(GrapNodeItem *headItem) {
-  connect(headItem, &GrapNodeItem::beStar, this, &MainWin::be_main_tree);
-  // 只有头节点才具备插入到其他节点后面的能力，合并的能力
-  connect(headItem, &GrapNodeItem::mergeToOther, this,
-          [this](GrapNodeItem *main_item, GrapNodeItem *sub_item) {
-            trees.erase(sub_item->getNodePtr());
-            this->grapPool->mergeTree(main_item, sub_item);
-          });
+  for (auto i : trees)
+    deleteTree(i);
+  // delete curtree;
 }
 
 void MainWin::print_tree(NodePtr headptr) {
@@ -102,13 +74,9 @@ void MainWin::print_tree(NodePtr headptr) {
   for (auto ptr : a节点集合) {
     bool isNew = false;
     GrapNodeItem *curNodeItem = grapPool->getGrapNode(ptr, isNew, headptr);
-    if (isNew) {
-      NodeItemConnect(curNodeItem);
-    }
     // 连接父节点到子节点的线
     grapPool->LineNodeToChild(curNodeItem);
   }
-  // grapPool->hideSurplus();
   scene->update();
 }
 
@@ -117,23 +85,14 @@ void MainWin::action_build() {
   qDebug() << "build";
 }
 
-// // ui->actrefresh 的点击信号
-// void MainWin::action_refresh_pos(NodePtr head) {
-//   // auto head = curtree->get_head();
-//   grapPool->updateGrapNodePos(head);
-//   scene->update();
-// }
-
 void MainWin::action_add_node() {
   NodePtr new_node = new Node("N");
-  // new_node->setColor(NodeColor::cyan);
   new_node->color = Qt::cyan;
   qDebug() << "action_add_node 新建一个node";
   new_node->setPos(QPointF(-60, -60));
   bool f{};
   GrapNodeItem *sub_item = grapPool->getGrapNode(new_node, f, new_node);
   grapPool->reSetTreeNodeItemHead(sub_item, sub_item->getNodePtr());
-  NodeItemConnect(sub_item);
 }
 void MainWin::action_leave(bool flag) {
   // 显示叶子，修改叶子的颜色
@@ -160,18 +119,3 @@ void MainWin::add_new_tree(sbt::NodePtr headptr) {
   trees.insert(headptr);
   print_tree(headptr);
 }
-void MainWin::changeNodeVal(NodePtr node) {
-  bool ok;
-  QString text = QInputDialog::getText(this, tr("Enter text"), tr("Text:"),
-                                       QLineEdit::Normal, QString(), &ok);
-  if (ok && !text.isEmpty()) {
-    node->val = text;
-  }
-  scene->update();
-}
-void MainWin::be_main_tree(sbt::NodePtr node) {
-  node->color = NodeColor::yellow;
-  curtree = node;
-}
-
-void MainWin::test1() {}

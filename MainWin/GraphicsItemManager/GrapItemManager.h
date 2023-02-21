@@ -8,14 +8,11 @@
 #include <config.h>
 #include <memory>
 #include <unordered_map>
-// #include<BinaryTreeStr.hpp>
 
 using std::unordered_map;
 class GrapNodeItem;
 class GrapLineItem;
 class QGraphicsScene;
-class GrapMoveItem;
-class QGraphicsItemGroup;
 namespace sbt {
 class BinaryTreeStr;
 
@@ -29,7 +26,9 @@ GrapNodeItem也不会负责NodePtr的释放
 class GRAP_LIB_EXPORT GrapItemManager : public QObject {
   Q_OBJECT
 public:
-  static std::shared_ptr<GrapItemManager> instance(QGraphicsScene *scene);
+  static std::shared_ptr<GrapItemManager>
+  instance(QGraphicsScene *scene, std::unordered_set<sbt::NodePtr> &trees,
+           sbt::NodePtr &curtree);
   QGraphicsScene *getScene();
   /**
    * @brief 获得一个节点图元
@@ -41,13 +40,11 @@ public:
    */
   GrapNodeItem *getGrapNode(sbt::NodePtr nodeptr, bool &isNew,
                             sbt::NodePtr headptr);
-  void deleteTree(GrapNodeItem *);
   /**
    * @brief  显示或者显示深度
    *
    * @param flag true 显示深度，false显示val
    */
-  void mergeTree(GrapNodeItem *main_item, GrapNodeItem *sub_item);
   void ShowDepthOrVal(bool flag);
   /**
    * @brief 获得包含nodeptr节点的图元
@@ -82,6 +79,15 @@ public:
   /**
    * @brief 断开father和child
    隐藏二者之间的直线
+   但是不会去掉
+   * 
+   * @param father 
+   * @param child 
+   */
+  void removeLine(GrapNodeItem *father, GrapNodeItem *child);
+  /**
+   * @brief 断开father和child
+   隐藏二者之间的直线
    去掉father内包含的line
    将
    *
@@ -108,11 +114,25 @@ public:
   // void hideNodes(sbt::NodePtr head);
 
   ~GrapItemManager();
+public slots:
+  void set_main_tree(GrapNodeItem *tree);
+  void truncate_tree(GrapNodeItem *curitem);
+  void changeNodeVal(GrapNodeItem *curitem);
+  void deleteTree(GrapNodeItem *curitem);
+  void mergeTree(GrapNodeItem *main_item, GrapNodeItem *sub_item);
+
+
+  // truncateCurTree
 
 private:
   inline static std::shared_ptr<GrapItemManager> ItemManager = nullptr;
   QGraphicsScene *scene = nullptr;
-  GrapItemManager(QGraphicsScene *scene);
+  GrapItemManager(QGraphicsScene *scene,
+                  std::unordered_set<sbt::NodePtr> &trees,
+                  sbt::NodePtr &curtree);
+  std::unordered_set<sbt::NodePtr> &trees;
+  sbt::NodePtr &curtree;
+
   // 空闲的节点图元，这个freeNodePool里面GrapNodeItem含有Node
   _SPC stack<GrapNodeItem *> freeNodePool;
 
